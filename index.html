@@ -92,6 +92,23 @@ small{color:#64748b}
 </div>
 
 <script>
+let waktuDasar = null;
+
+function jalankanJam() {
+  if (!waktuDasar) return;
+
+  const sekarang = new Date(waktuDasar.getTime());
+
+  document.getElementById("clock").textContent =
+    sekarang.toLocaleTimeString("en-GB", {
+      hour12: false,
+      timeZone: "Asia/Makassar"
+    });
+
+  waktuDasar.setSeconds(waktuDasar.getSeconds() + 1);
+}
+
+setInterval(jalankanJam, 1000);
 let client;
 
 function connectMQTT(){
@@ -138,8 +155,18 @@ function connectMQTT(){
     try{
       const data = JSON.parse(message.toString());
 
-      document.getElementById("clock").textContent =
-        data.jam || "--:--:--";
+      if (data.jam) {
+        const bagianWaktu = data.jam.split(":");
+        waktuDasar = new Date();
+        waktuDasar.setHours(
+          Number(bagianWaktu[0]),
+          Number(bagianWaktu[1]),
+          Number(bagianWaktu[2]),
+          0
+        );
+      }
+
+  
       document.getElementById("date").textContent =
         data.tanggal || "";
 
