@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Smart Jam Masjid IoT</title>
+<script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;padding:20px;
+  font-family:Arial,sans-serif;
+  background:#eef2f7;color:#172033;
+}
+.container{max-width:650px;margin:auto}
+header{
+  background:#075e49;color:white;
+  padding:22px;border-radius:16px;
+  text-align:center;
+}
+.panel{
+  background:white;padding:20px;
+  margin-top:16px;border-radius:15px;
+  box-shadow:0 3px 12px #0001;
+}
+.clock{text-align:center}
+#clock{font-size:42px;font-weight:bold}
+.status{font-weight:bold;color:#b45309}
+input,button{
+  width:100%;padding:12px;margin:6px 0;
+  border:1px solid #ccd3dc;border-radius:8px;
+}
+button{
+  background:#087a5b;color:white;
+  font-weight:bold;border:0;
+}
+.row{
+  display:flex;justify-content:space-between;
+  padding:12px 0;border-bottom:1px solid #eee;
+}
+pre{
+  white-space:pre-wrap;overflow-wrap:anywhere;
+  background:#f1f5f9;padding:12px;border-radius:8px;
+}
+small{color:#64748b}
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+<h2>SMART JAM MASJID</h2>
+<p>Dashboard Internet of Things</p>
+<div id="status" class="status">BELUM TERHUBUNG</div>
+</header>
+
+<div class="panel clock">
+<small>WAKTU SEKARANG</small>
+<div id="clock">--:--:--</div>
+<div id="date">Menunggu data ESP32</div>
+</div>
+
+<div class="panel">
+<h3>Jadwal Waktu Salat</h3>
+<div class="row"><span>Subuh</span><b id="subuh">--:--</b></div>
+<div class="row"><span>Zuhur</span><b id="zuhur">--:--</b></div>
+<div class="row"><span>Asar</span><b id="ashar">--:--</b></div>
+<div class="row"><span>Magrib</span><b id="magrib">--:--</b></div>
+<div class="row"><span>Isya</span><b id="isya">--:--</b></div>
+</div>
+
+<div class="panel">
+<h3>Koneksi MQTT EMQX</h3>
+<label>Username dashboard</label>
+<input id="username" placeholder="Username MQTT read-only">
+<label>Password dashboard</label>
+<input id="password" type="password" placeholder="Password MQTT">
+<button onclick="connectMQTT()">Hubungkan ke EMQX</button>
+<p><small>Kredensial tidak disimpan oleh halaman ini. Gunakan akun khusus dashboard yang hanya memiliki izin membaca data.</small></p>
+</div>
+
+<div class="panel">
+<h3>Status Alarm</h3>
+<p id="alarm">Menunggu data...</p>
+</div>
+
+<div class="panel">
+<h3>Data MQTT Terakhir</h3>
+<pre id="raw">Belum ada data.</pre>
+</div>
+
+</div>
+
+<script>
+let client;
+
+function connectMQTT(){
+  const username =
+    document.getElementById("username").value.trim();
+  const password =
+    document.getElementById("password").value;
+
+  if(!username || !password){
+    alert("Isi username dan password MQTT terlebih dahulu.");
+    return;
+  }
+
+  if(client) client.end(true);
+
+  document.getElementById("status").textContent =
+    "MENGHUBUNGKAN...";
+
+  client = mqtt.connect(
+    "wss://i165de43.ala.asia-southeast1.emqxsl.com:8084/mqtt",
+    {
+      username: username,
+      password: password,
+      clientId: "dashboard_" +
+        Math.random().toString(16).slice(2),
+      clean: true,
+      connectTimeout: 10000,
+      reconnectPeriod: 3000
+    }
+  );
+
+  client.on("connect", function(){
+    document.getElementById("status").textContent =
+      "TERHUBUNG";
+    document.getElementById("status").style.color =
+      "green";
+
+    client.subscribe("smartjam/masjid/data", function(err){
+      if(err) console.error("Subscribe gagal:",err);
+    });
+  });
+
+  client.on("message", function(topic, message){
+    try{
+      const data = JSON.parse(message.toString());
+
+      document.getElementById("clock").textContent =
+        data.jam || "--:--:--";
+      document.getElementById("date").textContent =
+        data.tanggal || "";
+
+      ["subuh","zuhur","ashar","magrib","isya"]
+        .forEach(function(key){
+          document.getElementById(key).textContent =
+            data[key] || "--:--";
+        });
+
+      document.getElementById("alarm").textContent =
+        data.alarm ? "AKTIF" : "NONAKTIF";
+
+      document.getElementById("raw").textContent =
+        JSON.stringify(data,null,2);
+
+    }catch(e){
+      document.getElementById("raw").textContent =
+        message.toString();
+    }
+  });
+
+  client.on("error", function(err){
+    document.getElementById("status").textContent =
+      "KONEKSI ERROR";
+    console.error(err);
+  });
+
+  client.on("offline", function(){
+    document.getElementById("status").textContent =
+      "OFFLINE";
+  });
+}
+</script>
+</body>
+</html>
