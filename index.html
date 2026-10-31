@@ -96,11 +96,7 @@ small{color:#64748b}
   <button onclick="alarmOFF()">ALARM OFF</button>
 
   <button onclick="testBuzzer()">TEST BUZZER</button>
-    <button onclick="testNotifikasi()">
-      TEST NOTIFIKASI</button>
-    <button onclick="testAuto()">
-      TEST AUTO ESP32</button>
-                       
+    
 </div>
 
 <div class="panel">
@@ -255,12 +251,6 @@ function testBuzzer() {
   kirimPerintah("TEST_BUZZER");
 }
 
-function testNotifikasi() {
-  if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
-    return;
-  }
-
   client.publish(
     "smartjam/masjid/control",
     "TEST_NOTIFIKASI",
@@ -274,12 +264,6 @@ function testNotifikasi() {
     }
   );
 }
-
-  function testAuto() {
-  if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
-    return;
-  }
 
   client.publish(
     "smartjam/masjid/control",
