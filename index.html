@@ -83,6 +83,15 @@ small{color:#64748b}
 <h3>Status Alarm</h3>
 <p id="alarm">Menunggu data...</p>
 </div>
+  <div class="panel">
+  <h3>Kendali Alarm Masjid</h3>
+
+  <button onclick="alarmON()">ALARM ON</button>
+
+  <button onclick="alarmOFF()">ALARM OFF</button>
+
+  <button onclick="testBuzzer()">TEST BUZZER</button>
+</div>
 
 <div class="panel">
 <h3>Data MQTT Terakhir</h3>
@@ -198,6 +207,37 @@ function connectMQTT(){
     document.getElementById("status").textContent =
       "OFFLINE";
   });
+}
+  function kirimPerintah(perintah) {
+  if (!client || !client.connected) {
+    alert("MQTT belum terhubung!");
+    return;
+  }
+
+  client.publish(
+    "smartjam/masjid/control",
+    perintah,
+    { qos: 1 },
+    function(err) {
+      if (err) {
+        alert("Gagal mengirim perintah!");
+      } else {
+        alert("Perintah dikirim: " + perintah);
+      }
+    }
+  );
+}
+
+function alarmON() {
+  kirimPerintah("ALARM_ON");
+}
+
+function alarmOFF() {
+  kirimPerintah("ALARM_OFF");
+}
+
+function testBuzzer() {
+  kirimPerintah("TEST_BUZZER");
 }
 </script>
 </body>
