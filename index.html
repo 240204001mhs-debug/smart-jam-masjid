@@ -182,6 +182,23 @@ small { color: #64748b; }
   SIMPAN JADWAL SALAT
 </button>
 
+  
+<div class="panel">
+  <h3>⚙️ Mode Jadwal Salat</h3>
+
+  <button onclick="aktifkanModeManual()">
+    MODE MANUAL
+  </button>
+
+  <button onclick="aktifkanModeOtomatis()"
+          style="background:#16a34a">
+    MODE OTOMATIS
+  </button>
+
+  <p id="statusMode">Mode belum dipilih</p>
+</div>
+
+  
   <div class="panel">
   <h3>⚙️ Mode Jadwal Salat</h3>
 
@@ -496,6 +513,7 @@ function aturDurasi() {
   kirimPerintah("DURASI:" + durasi);
 }
 
+
 // ===== PENGATURAN JADWAL SALAT MANUAL =====
 function kirimJadwalManual() {
   const subuh = document.getElementById("subuhManual").value;
@@ -513,37 +531,21 @@ function kirimJadwalManual() {
     [subuh, zuhur, ashar, magrib, isya].join(",");
 
   kirimPerintah(jadwal);
-
-  
-<div class="panel">
-  <h3>⚙️ Mode Jadwal Salat</h3>
-
-  <button onclick="aktifkanModeManual()">
-    MODE MANUAL
-  </button>
-
-  <button onclick="aktifkanModeOtomatis()"
-          style="background:#16a34a">
-    MODE OTOMATIS
-  </button>
-
-  <p id="statusMode">
-    Mode belum dipilih
-  </p>
-</div>
-            
 }
-  
+
+// ===== MODE MANUAL =====
 function aktifkanModeManual() {
   kirimJadwalManual();
 }
 
+// ===== MODE OTOMATIS =====
 function aktifkanModeOtomatis() {
   kirimPerintah("MODE_AUTO");
 
   document.getElementById("statusMode").innerText =
     "Mode: OTOMATIS";
 }
+
 
 </script>
 </body>
