@@ -158,6 +158,29 @@ small { color: #64748b; }
 <button onclick="aturDurasi()">
   SIMPAN DURASI
 </button>
+
+  <hr>
+
+<h3>🕌 Pengaturan Jadwal Salat</h3>
+
+<label>Subuh</label>
+<input type="time" id="subuhManual" value="04:30">
+
+<label>Zuhur</label>
+<input type="time" id="zuhurManual" value="12:05">
+
+<label>Asar</label>
+<input type="time" id="asharManual" value="15:20">
+
+<label>Magrib</label>
+<input type="time" id="magribManual" value="18:15">
+
+<label>Isya</label>
+<input type="time" id="isyaManual" value="19:30">
+
+<button onclick="kirimJadwalManual()">
+  SIMPAN JADWAL SALAT
+</button>
   
 </div>
 <div class="panel">
@@ -445,6 +468,34 @@ function testBuzzer() {
 }
 
 function aturDurasi() {
+  function kirimJadwalManual() {
+  const subuh = document.getElementById("subuhManual").value;
+  const zuhur = document.getElementById("zuhurManual").value;
+  const ashar = document.getElementById("asharManual").value;
+  const magrib = document.getElementById("magribManual").value;
+  const isya = document.getElementById("isyaManual").value;
+
+  if (!subuh || !zuhur || !ashar || !magrib || !isya) {
+    alert("Semua jadwal salat harus diisi!");
+    return;
+  }
+
+  if (!client || !client.connected) {
+    alert("MQTT belum terhubung!");
+    return;
+  }
+
+  const jadwal =
+    "JADWAL:" +
+    [subuh, zuhur, ashar, magrib, isya].join(",");
+
+  client.publish(
+    "smartjam/masjid/control",
+    jadwal
+  );
+
+  alert("Perintah jadwal salat berhasil dikirim!");
+}
   const durasi = Number(
     document.getElementById("durasiBuzzer").value
   );
