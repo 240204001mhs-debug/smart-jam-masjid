@@ -253,8 +253,23 @@ function testBuzzer() {
 }
 
 function testNotifikasi() {
-  document.getElementById("notification").textContent =
-    "🔔 WAKTU SALAT TIBA: SUBUH (SIMULASI)";
+  if (!client || !client.connected) {
+    alert("MQTT belum terhubung!");
+    return;
+  }
+
+  client.publish(
+    "smartjam/masjid/control",
+    "TEST_NOTIFIKASI",
+    { qos: 1 },
+    function(err) {
+      if (err) {
+        alert("Gagal mengirim notifikasi!");
+      } else {
+        alert("Perintah TEST_NOTIFIKASI berhasil dikirim!");
+      }
+    }
+  );
 }
 </script>
 </body>
