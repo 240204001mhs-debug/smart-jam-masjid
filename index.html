@@ -160,6 +160,23 @@ function connectMQTT(){
       "TERHUBUNG";
     document.getElementById("status").style.color =
       "green";
+    
+  client.on("error", function(err) {
+  console.error("MQTT ERROR:", err);
+  document.getElementById("status").textContent =
+    "MQTT ERROR";
+  });
+    
+  client.on("close", function() {
+  document.getElementById("status").textContent =
+    "DISCONNECTED";
+  });
+    
+  client.on("reconnect", function() {
+  document.getElementById("status").textContent =
+    "MENGHUBUNGKAN ULANG...";
+  });
+
 
     client.subscribe("smartjam/masjid/data", function(err){
       if(err) console.error("Subscribe gagal:",err);
@@ -180,23 +197,6 @@ function connectMQTT(){
           0
         );
       }
-
-    client.on("error", function(err) {
-  console.error("MQTT ERROR:", err);
-  document.getElementById("status").textContent =
-    "MQTT ERROR";
-});
-
-client.on("close", function() {
-  document.getElementById("status").textContent =
-    "DISCONNECTED";
-});
-
-client.on("reconnect", function() {
-  document.getElementById("status").textContent =
-    "MENGHUBUNGKAN ULANG...";
-});
-
   
       document.getElementById("date").textContent =
         data.tanggal || "";
