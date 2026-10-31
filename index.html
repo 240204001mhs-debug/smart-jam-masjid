@@ -181,6 +181,22 @@ function connectMQTT(){
         );
       }
 
+    client.on("error", function(err) {
+  console.error("MQTT ERROR:", err);
+  document.getElementById("status").textContent =
+    "MQTT ERROR";
+});
+
+client.on("close", function() {
+  document.getElementById("status").textContent =
+    "DISCONNECTED";
+});
+
+client.on("reconnect", function() {
+  document.getElementById("status").textContent =
+    "MENGHUBUNGKAN ULANG...";
+});
+
   
       document.getElementById("date").textContent =
         data.tanggal || "";
