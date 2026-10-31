@@ -354,9 +354,9 @@ function ubahStatus(teks, warna) {
 // ===== KONEKSI MQTT =====
 function connectMQTT() {
   const username =
-    document.getElementById("username").value.trim();
+    document.getElementById("smart23").value.trim();
   const password =
-    document.getElementById("password").value;
+    document.getElementById("sahrian23052006").value;
   if (!username || !password) {
     alert("Isi username dan password MQTT terlebih dahulu.");
     return;
@@ -366,6 +366,9 @@ function connectMQTT() {
     client = null;
   }
   ubahStatus("MENGHUBUNGKAN...", "#b45309");
+  console.log("MQTT library:", typeof mqtt);
+  console.log("Username terisi:", !!username);
+  console.log("Memulai koneksi MQTT...");
   client = mqtt.connect(
     "wss://i165de43.ala.asia-southeast1.emqxsl.com:8084/mqtt",
     {
@@ -454,9 +457,9 @@ function connectMQTT() {
   });
   // ERROR
   client.on("error", function(err) {
-    ubahStatus("KONEKSI ERROR", "#dc2626");
-    console.error("MQTT ERROR:", err);
-  });
+  console.error("MQTT ERROR:", err);
+  ubahStatus("KONEKSI ERROR", "#dc2626");
+});
   // TERPUTUS
   client.on("close", function() {
     ubahStatus("DISCONNECTED", "#dc2626");
