@@ -90,6 +90,17 @@ small { color: #64748b; }
   <h3>🔔 Notifikasi Waktu Salat</h3>
   <p id="notification">Belum ada waktu salat tiba</p>
 </div>
+  
+<div class="panel">
+  <h3>📋 Riwayat Notifikasi</h3>
+  <div id="history">
+    <p>Belum ada riwayat notifikasi.</p>
+  </div>
+  <button onclick="hapusRiwayat()" style="background:#dc2626">
+    HAPUS RIWAYAT
+  </button>
+</div>
+  
 <div class="panel">
   <h3>Koneksi MQTT EMQX</h3>
   <label>Username MQTT</label>
@@ -123,6 +134,92 @@ small { color: #64748b; }
 <script>
 let client = null;
 let waktuDetik = null;
+
+// ===== RIWAYAT NOTIFIKASI PERMANEN =====
+
+let riwayatNotifikasi = [];
+
+try {
+  riwayatNotifikasi = JSON.parse(
+    localStorage.getItem("riwayatSmartJam") || "[]"
+  );
+} catch (e) {
+  riwayatNotifikasi = [];
+}
+
+// Tampilkan riwayat tersimpan
+function tampilkanRiwayat() {
+  const area = document.getElementById("history");
+
+  if (riwayatNotifikasi.length === 0) {
+    area.innerHTML =
+      "<p>Belum ada riwayat notifikasi.</p>";
+    return;
+  }
+
+  area.innerHTML = riwayatNotifikasi.map(item => `
+    <div style="
+      padding:12px;
+      border-bottom:1px solid #eee;
+      text-align:left;
+    ">
+      <b>🔔 ${item.nama}</b>
+      <br>
+      <small>${item.tanggal} | ${item.jam}</small>
+    </div>
+  `).join("");
+}
+
+// Simpan notifikasi baru
+function simpanNotifikasi(nama, tanggal, jam) {
+
+  if (!nama || !tanggal || !jam) return;
+
+  const id = tanggal + "_" + nama;
+
+  // Cegah notifikasi yang sama tersimpan berulang
+  if (riwayatNotifikasi.some(item => item.id === id)) {
+    return;
+  }
+
+  riwayatNotifikasi.unshift({
+    id: id,
+    nama: nama,
+    tanggal: tanggal,
+    jam: jam
+  });
+
+  // Maksimal 50 riwayat
+  riwayatNotifikasi = riwayatNotifikasi.slice(0, 50);
+
+  try {
+    localStorage.setItem(
+      "riwayatSmartJam",
+      JSON.stringify(riwayatNotifikasi)
+    );
+
+    tampilkanRiwayat();
+  } catch (e) {
+    console.error("Gagal menyimpan riwayat:", e);
+  }
+}
+
+// Hapus semua riwayat
+function hapusRiwayat() {
+  if (!confirm("Yakin ingin menghapus semua riwayat?")) {
+    return;
+  }
+
+  riwayatNotifikasi = [];
+
+  localStorage.removeItem("riwayatSmartJam");
+
+  tampilkanRiwayat();
+}
+
+// Tampilkan data saat dashboard dibuka
+tampilkanRiwayat();
+  
 // ===== JAM DIGITAL =====
 function jalankanJam() {
   if (waktuDetik === null) return;
@@ -216,9 +313,20 @@ function connectMQTT() {
       document.getElementById("alarm").textContent =
         data.alarm ? "AKTIF" : "NONAKTIF";
       document.getElementById("notification").textContent =
-        data.notifikasi
-          ? "🔔 WAKTU SALAT TIBA: " + data.notifikasi
-          : "Belum ada waktu salat tiba";
+  data.notifikasi
+    ? "🔔 WAKTU SALAT TIBA: " + data.notifikasi
+    : "Belum ada waktu salat tiba";
+
+    // Simpan riwayat jika ada notifikasi baru
+    if (data.notifikasi) {
+    simpanNotifikasi(
+    data.notifikasi,
+    data.tanggal,
+    data.jam
+  );
+}
+
+
       document.getElementById("raw").textContent =
         JSON.stringify(data, null, 2);
     } catch (e) {
