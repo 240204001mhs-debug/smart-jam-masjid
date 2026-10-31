@@ -80,7 +80,7 @@ small{color:#64748b}
 <input id="username" placeholder="Username MQTT read-only">
 <label>Password dashboard</label>
 <input id="password" type="password" placeholder="Password MQTT">
-<button onclick="connectMQTT()">Hubungkan ke EMQX</button>
+<button onclick="connectMQTT">Hubungkan ke EMQX</button>
 <p><small>Kredensial tidak disimpan oleh halaman ini. Gunakan akun khusus dashboard yang hanya memiliki izin membaca data.</small></p>
 </div>
 
@@ -196,12 +196,7 @@ client.on("offline", function(){
   document.getElementById("status").textContent =
     "OFFLINE";
 });
-
-    client.subscribe("smartjam/masjid/data", function(err){
-      if(err) console.error("Subscribe gagal:",err);
-    });
-  });
-
+  
   client.on("message", function(topic, message){
     try{
       const data = JSON.parse(message.toString());
@@ -262,8 +257,8 @@ client.on("offline", function(){
 
   client.publish(
     "smartjam/masjid/control",
-    perintah,
-    { qos: 1 },
+    perintah,{ qos: 1 },
+    
     function(err) {
       if (err) {
         alert("Gagal mengirim perintah!");
