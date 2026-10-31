@@ -498,9 +498,38 @@ function kirimJadwalManual() {
     [subuh, zuhur, ashar, magrib, isya].join(",");
 
   kirimPerintah(jadwal);
-}
 
   
+<div class="panel">
+  <h3>⚙️ Mode Jadwal Salat</h3>
+
+  <button onclick="aktifkanModeManual()">
+    MODE MANUAL
+  </button>
+
+  <button onclick="aktifkanModeOtomatis()"
+          style="background:#16a34a">
+    MODE OTOMATIS
+  </button>
+
+  <p id="statusMode">
+    Mode belum dipilih
+  </p>
+</div>
+            
+}
+  
+function aktifkanModeManual() {
+  kirimJadwalManual();
+}
+
+function aktifkanModeOtomatis() {
+  kirimPerintah("MODE_AUTO");
+
+  document.getElementById("statusMode").innerText =
+    "Mode: OTOMATIS";
+}
+
 </script>
 </body>
 </html>
