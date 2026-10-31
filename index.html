@@ -178,7 +178,7 @@ small { color: #64748b; }
 <label>Isya</label>
 <input type="time" id="isyaManual" value="19:30">
 
-<button onclick="alert('TOMBOL BERFUNGSI')">
+<button onclick="kirimJadwalManual()">
   SIMPAN JADWAL SALAT
 </button>
   
@@ -467,8 +467,22 @@ function testBuzzer() {
   kirimPerintah("TEST_BUZZER");
 }
 
+// ===== PENGATURAN DURASI BUZZER =====
 function aturDurasi() {
-  function kirimJadwalManual() {
+  const durasi = Number(
+    document.getElementById("durasiBuzzer").value
+  );
+
+  if (!Number.isInteger(durasi) || durasi < 100 || durasi > 10000) {
+    alert("Durasi harus antara 100 sampai 10000 ms!");
+    return;
+  }
+
+  kirimPerintah("DURASI:" + durasi);
+}
+
+// ===== PENGATURAN JADWAL SALAT MANUAL =====
+function kirimJadwalManual() {
   const subuh = document.getElementById("subuhManual").value;
   const zuhur = document.getElementById("zuhurManual").value;
   const ashar = document.getElementById("asharManual").value;
@@ -480,43 +494,12 @@ function aturDurasi() {
     return;
   }
 
-  if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
-    return;
-  }
-
-  const jadwal =
-    "JADWAL:" +
+  const jadwal = "JADWAL:" +
     [subuh, zuhur, ashar, magrib, isya].join(",");
 
-  client.publish(
-    "smartjam/masjid/control",
-    jadwal
-  );
-
-  alert("Perintah jadwal salat berhasil dikirim!");
+  kirimPerintah(jadwal);
 }
-  const durasi = Number(
-    document.getElementById("durasiBuzzer").value
-  );
 
-  if (!Number.isInteger(durasi) || durasi < 100 || durasi > 10000) {
-    alert("Durasi harus antara 100 sampai 10000 ms!");
-    return;
-  }
-
-  if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
-    return;
-  }
-
-  client.publish(
-    "smartjam/masjid/control",
-    "DURASI:" + durasi
-  );
-
-  alert("Perintah durasi berhasil dikirim: " + durasi + " ms");
-}
   
 </script>
 </body>
