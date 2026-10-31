@@ -119,6 +119,23 @@ small { color: #64748b; }
   <h3>Status Alarm</h3>
   <p id="alarm">Menunggu data...</p>
 </div>
+
+  <div class="panel">
+  <h3>📡 Status Perangkat ESP32</h3>
+
+  <p>
+    Status:
+    <b id="deviceStatus" style="color:#b45309">
+      MENUNGGU DATA
+    </b>
+  </p>
+
+  <p>
+    Terakhir menerima data:
+    <b id="lastReceived">Belum ada data</b>
+  </p>
+</div>
+  
 <div class="panel">
   <h3>Kendali Alarm Masjid</h3>
   <button onclick="alarmON()">ALARM ON</button>
@@ -134,6 +151,31 @@ small { color: #64748b; }
 <script>
 let client = null;
 let waktuDetik = null;
+
+// ===== STATUS ESP32 =====
+let lastDataReceived = 0;
+
+function periksaStatusESP32() {
+  const status = document.getElementById("deviceStatus");
+
+  if (lastDataReceived === 0) {
+    status.textContent = "MENUNGGU DATA";
+    status.style.color = "#b45309";
+    return;
+  }
+
+  const selisih = Date.now() - lastDataReceived;
+
+  if (selisih <= 30000) {
+    status.textContent = "ONLINE";
+    status.style.color = "#16a34a";
+  } else {
+    status.textContent = "OFFLINE";
+    status.style.color = "#dc2626";
+  }
+}
+
+setInterval(periksaStatusESP32, 3000);
 
 // ===== RIWAYAT NOTIFIKASI PERMANEN =====
 
@@ -282,6 +324,9 @@ function connectMQTT() {
   });
   // MENERIMA DATA ESP32
   client.on("message", function(topic, message) {
+    lastDataReceived = Date.now();
+    document.getElementById("lastReceived").textContent =
+      new Date(lastDataReceived).toLocaleTimeString("id-ID");
     try {
       const data = JSON.parse(message.toString());
       if (data.jam) {
