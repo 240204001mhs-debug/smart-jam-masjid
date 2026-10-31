@@ -141,7 +141,24 @@ small { color: #64748b; }
   <button onclick="alarmON()">ALARM ON</button>
   <button onclick="alarmOFF()">ALARM OFF</button>
   <button onclick="testBuzzer()">TEST BUZZER</button>
- 
+  
+  <hr>
+
+<h3>⏱️ Pengaturan Durasi Buzzer</h3>
+
+<input
+  type="number"
+  id="durasiBuzzer"
+  value="2000"
+  min="100"
+  max="10000"
+  step="100"
+>
+
+<button onclick="aturDurasi()">
+  SIMPAN DURASI
+</button>
+  
 </div>
 <div class="panel">
   <h3>Data MQTT Terakhir</h3>
@@ -426,12 +443,30 @@ function alarmOFF() {
 function testBuzzer() {
   kirimPerintah("TEST_BUZZER");
 }
-function testNotifikasi() {
-  kirimPerintah("TEST_NOTIFIKASI");
+
+function aturDurasi() {
+  const durasi = Number(
+    document.getElementById("durasiBuzzer").value
+  );
+
+  if (!Number.isInteger(durasi) || durasi < 100 || durasi > 10000) {
+    alert("Durasi harus antara 100 sampai 10000 ms!");
+    return;
+  }
+
+  if (!client || !client.connected) {
+    alert("MQTT belum terhubung!");
+    return;
+  }
+
+  client.publish(
+    "smartjam/masjid/control",
+    "DURASI:" + durasi
+  );
+
+  alert("Perintah durasi berhasil dikirim: " + durasi + " ms");
 }
-function testAuto() {
-  kirimPerintah("TEST_AUTO");
-}
+  
 </script>
 </body>
 </html>
