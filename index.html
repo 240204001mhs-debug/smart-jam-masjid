@@ -68,7 +68,12 @@ small{color:#64748b}
 <div class="row"><span>Magrib</span><b id="magrib">--:--</b></div>
 <div class="row"><span>Isya</span><b id="isya">--:--</b></div>
 </div>
-
+  
+<div class="panel">
+  <h3>🔔 Notifikasi Waktu Salat</h3>
+  <p id="notification">Belum ada waktu salat tiba</p>
+</div>
+  
 <div class="panel">
 <h3>Koneksi MQTT EMQX</h3>
 <label>Username dashboard</label>
@@ -187,6 +192,11 @@ function connectMQTT(){
 
       document.getElementById("alarm").textContent =
         data.alarm ? "AKTIF" : "NONAKTIF";
+      
+      document.getElementById("notification").textContent =
+        data.notifikasi
+        ? "🔔 WAKTU SALAT TIBA: " + data.notifikasi
+        : "Belum ada waktu salat tiba";
 
       document.getElementById("raw").textContent =
         JSON.stringify(data,null,2);
