@@ -104,9 +104,9 @@ small { color: #64748b; }
 <div class="panel">
   <h3>Koneksi MQTT EMQX</h3>
   <label>Username MQTT</label>
-  <input id="Username" placeholder="Username MQTT">
+  <input type="Username" id="Username MQTT">
   <label>password MQTT</label>
-  <input id="password" type="password" placeholder="password MQTT">
+  <input type="password" id="password MQTT">
   <button id="connectButton" onclick="connectMQTT()">
     HUBUNGKAN KE EMQX
   </button>
@@ -353,10 +353,18 @@ function ubahStatus(teks, warna) {
 }
 // ===== KONEKSI MQTT =====
 function connectMQTT() {
-  const username =
-    document.getElementById("smart23").value.trim();
-  const password =
-    document.getElementById("sahrian23052006").value;
+ const usernameInput = document.getElementById("username");
+const passwordInput = document.getElementById("password");
+
+if (!usernameInput || !passwordInput) {
+  console.error("Input username atau password tidak ditemukan!");
+  alert("Kolom username atau password tidak ditemukan.");
+  return;
+}
+
+const username = usernameInput.value.trim();
+const password = passwordInput.value;
+  
   if (!username || !password) {
     alert("Isi username dan password MQTT terlebih dahulu.");
     return;
