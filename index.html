@@ -381,6 +381,7 @@ function connectMQTT() {
       reconnectPeriod: 3000
     }
   );
+  
   // BERHASIL TERHUBUNG
   client.on("connect", function() {
     ubahStatus("TERHUBUNG", "#16a34a");
