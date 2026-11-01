@@ -345,19 +345,26 @@ function ubahStatus(teks, warna) {
 
 // ===== KONEKSI MQTT =====
 function connectMQTT() {
-  if (typeof mqtt === "undefined") {
-    alert("Library MQTT belum berhasil dimuat. Periksa koneksi internet.");
+  const usernameInput =
+    document.getElementById("Username MQTT");
+
+  const passwordInput =
+    document.getElementById("password MQTT");
+
+  if (!usernameInput || !passwordInput) {
+    alert("Kolom username atau password tidak ditemukan!");
     return;
   }
 
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
-  
-  if (client) {
-    client.end(true);
-    client = null;
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value;
+
+  if (!username || !password) {
+    alert("Isi username dan password MQTT terlebih dahulu.");
+    return;
   }
 
+  // LANJUTKAN KODE MQTT LAMA DI SINI
   ubahStatus("MENGHUBUNGKAN...", "#b45309");
 
   client = mqtt.connect(
