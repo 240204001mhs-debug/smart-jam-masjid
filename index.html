@@ -1,12 +1,17 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Smart Jam Masjid IoT</title>
+
+<!-- Library MQTT.js harus berada di bagian HEAD -->
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+
 <style>
 * { box-sizing: border-box; }
+
 body {
   margin: 0;
   padding: 20px;
@@ -14,7 +19,9 @@ body {
   background: #eef2f7;
   color: #172033;
 }
+
 .container { max-width: 650px; margin: auto; }
+
 header {
   background: #075e49;
   color: white;
@@ -22,6 +29,7 @@ header {
   border-radius: 16px;
   text-align: center;
 }
+
 .panel {
   background: white;
   padding: 20px;
@@ -29,9 +37,15 @@ header {
   border-radius: 15px;
   box-shadow: 0 3px 12px #0001;
 }
+
 .clock { text-align: center; }
 #clock { font-size: 42px; font-weight: bold; }
-.status { font-weight: bold; color: #b45309; }
+
+.status {
+  font-weight: bold;
+  color: #b45309;
+}
+
 input, button {
   width: 100%;
   padding: 12px;
@@ -39,6 +53,7 @@ input, button {
   border: 1px solid #ccd3dc;
   border-radius: 8px;
 }
+
 button {
   background: #087a5b;
   color: white;
@@ -46,16 +61,19 @@ button {
   border: 0;
   cursor: pointer;
 }
+
 button:disabled {
   background: #94a3b8;
   cursor: not-allowed;
 }
+
 .row {
   display: flex;
   justify-content: space-between;
   padding: 12px 0;
   border-bottom: 1px solid #eee;
 }
+
 pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -63,21 +81,26 @@ pre {
   padding: 12px;
   border-radius: 8px;
 }
+
 small { color: #64748b; }
 </style>
 </head>
+
 <body>
 <div class="container">
+
 <header>
   <h2>SMART JAM MASJID</h2>
   <p>Dashboard Internet of Things</p>
   <div id="status" class="status">BELUM TERHUBUNG</div>
 </header>
+
 <div class="panel clock">
   <small>WAKTU SEKARANG</small>
   <div id="clock">--:--:--</div>
   <div id="date">Menunggu data ESP32</div>
 </div>
+
 <div class="panel">
   <h3>Jadwal Waktu Salat</h3>
   <div class="row"><span>Subuh</span><b id="subuh">--:--</b></div>
@@ -86,11 +109,12 @@ small { color: #64748b; }
   <div class="row"><span>Magrib</span><b id="magrib">--:--</b></div>
   <div class="row"><span>Isya</span><b id="isya">--:--</b></div>
 </div>
+
 <div class="panel">
   <h3>🔔 Notifikasi Waktu Salat</h3>
   <p id="notification">Belum ada waktu salat tiba</p>
 </div>
-  
+
 <div class="panel">
   <h3>📋 Riwayat Notifikasi</h3>
   <div id="history">
@@ -100,89 +124,83 @@ small { color: #64748b; }
     HAPUS RIWAYAT
   </button>
 </div>
-  
+
 <div class="panel">
   <h3>Koneksi MQTT EMQX</h3>
+
   <label>Username MQTT</label>
-  <input type="Username" id="Username MQTT">
-  <label>password MQTT</label>
-  <input type="password" id="password MQTT">
+  <input type="text" id="username" autocomplete="username"
+         placeholder="Masukkan username MQTT">
+
+  <label>Password MQTT</label>
+  <input type="password" id="password"
+         autocomplete="current-password"
+         placeholder="Masukkan password MQTT">
+
   <button id="connectButton" onclick="connectMQTT()">
     HUBUNGKAN KE EMQX
   </button>
+
   <p><small>
     Gunakan akun MQTT khusus dashboard dengan izin membaca data
     dan mengirim perintah kontrol.
   </small></p>
 </div>
+
 <div class="panel">
   <h3>Status Alarm</h3>
   <p id="alarm">Menunggu data...</p>
 </div>
 
-  <div class="panel">
+<div class="panel">
   <h3>📡 Status Perangkat ESP32</h3>
-
-  <p>
-    Status:
-    <b id="deviceStatus" style="color:#b45309">
-      MENUNGGU DATA
-    </b>
+  <p>Status:
+    <b id="deviceStatus" style="color:#b45309">MENUNGGU DATA</b>
   </p>
-
-  <p>
-    Terakhir menerima data:
+  <p>Terakhir menerima data:
     <b id="lastReceived">Belum ada data</b>
   </p>
 </div>
-  
+
 <div class="panel">
   <h3>Kendali Alarm Masjid</h3>
+
   <button onclick="alarmON()">ALARM ON</button>
   <button onclick="alarmOFF()">ALARM OFF</button>
   <button onclick="testBuzzer()">TEST BUZZER</button>
-  
-  <hr>
-
-<h3>⏱️ Pengaturan Durasi Buzzer</h3>
-
-<input
-  type="number"
-  id="durasiBuzzer"
-  value="2000"
-  min="100"
-  max="10000"
-  step="100"
->
-
-<button onclick="aturDurasi()">
-  SIMPAN DURASI
-</button>
 
   <hr>
 
-<h3>🕌 Pengaturan Jadwal Salat</h3>
+  <h3>⏱️ Pengaturan Durasi Buzzer</h3>
+  <input type="number" id="durasiBuzzer"
+         value="2000" min="100" max="10000" step="100">
 
-<label>Subuh</label>
-<input type="time" id="subuhManual" value="04:30">
+  <button onclick="aturDurasi()">SIMPAN DURASI</button>
 
-<label>Zuhur</label>
-<input type="time" id="zuhurManual" value="12:05">
+  <hr>
 
-<label>Asar</label>
-<input type="time" id="asharManual" value="15:20">
+  <h3>🕌 Pengaturan Jadwal Salat</h3>
 
-<label>Magrib</label>
-<input type="time" id="magribManual" value="18:15">
+  <label>Subuh</label>
+  <input type="time" id="subuhManual" value="04:30">
 
-<label>Isya</label>
-<input type="time" id="isyaManual" value="19:30">
+  <label>Zuhur</label>
+  <input type="time" id="zuhurManual" value="12:05">
 
-<button onclick="kirimJadwalManual()">
-  SIMPAN JADWAL SALAT
-</button>
+  <label>Asar</label>
+  <input type="time" id="asharManual" value="15:20">
 
-  
+  <label>Magrib</label>
+  <input type="time" id="magribManual" value="18:15">
+
+  <label>Isya</label>
+  <input type="time" id="isyaManual" value="19:30">
+
+  <button onclick="kirimJadwalManual()">
+    SIMPAN JADWAL SALAT
+  </button>
+</div>
+
 <div class="panel">
   <h3>⚙️ Mode Jadwal Salat</h3>
 
@@ -198,35 +216,19 @@ small { color: #64748b; }
   <p id="statusMode">Mode belum dipilih</p>
 </div>
 
-  
-  <div class="panel">
-  <h3>⚙️ Mode Jadwal Salat</h3>
-
-  <button onclick="aktifkanModeManual()">
-    MODE MANUAL
-  </button>
-
-  <button onclick="aktifkanModeOtomatis()"
-          style="background-color: green;">
-    MODE OTOMATIS
-  </button>
-
-  <p id="statusMode">Mode belum dipilih</p>
-</div>
-  
-</div>
 <div class="panel">
   <h3>Data MQTT Terakhir</h3>
   <pre id="raw">Belum ada data.</pre>
 </div>
+
 </div>
+
 <script>
 let client = null;
 let waktuDetik = null;
-
-// ===== STATUS ESP32 =====
 let lastDataReceived = 0;
 
+// ===== STATUS ESP32 =====
 function periksaStatusESP32() {
   const status = document.getElementById("deviceStatus");
 
@@ -236,9 +238,7 @@ function periksaStatusESP32() {
     return;
   }
 
-  const selisih = Date.now() - lastDataReceived;
-
-  if (selisih <= 30000) {
+  if (Date.now() - lastDataReceived <= 30000) {
     status.textContent = "ONLINE";
     status.style.color = "#16a34a";
   } else {
@@ -249,34 +249,31 @@ function periksaStatusESP32() {
 
 setInterval(periksaStatusESP32, 3000);
 
-// ===== RIWAYAT NOTIFIKASI PERMANEN =====
-
+// ===== RIWAYAT NOTIFIKASI =====
 let riwayatNotifikasi = [];
 
 try {
   riwayatNotifikasi = JSON.parse(
     localStorage.getItem("riwayatSmartJam") || "[]"
   );
+
+  if (!Array.isArray(riwayatNotifikasi)) {
+    riwayatNotifikasi = [];
+  }
 } catch (e) {
   riwayatNotifikasi = [];
 }
 
-// Tampilkan riwayat tersimpan
 function tampilkanRiwayat() {
   const area = document.getElementById("history");
 
   if (riwayatNotifikasi.length === 0) {
-    area.innerHTML =
-      "<p>Belum ada riwayat notifikasi.</p>";
+    area.innerHTML = "<p>Belum ada riwayat notifikasi.</p>";
     return;
   }
 
   area.innerHTML = riwayatNotifikasi.map(item => `
-    <div style="
-      padding:12px;
-      border-bottom:1px solid #eee;
-      text-align:left;
-    ">
+    <div style="padding:12px;border-bottom:1px solid #eee;text-align:left">
       <b>🔔 ${item.nama}</b>
       <br>
       <small>${item.tanggal} | ${item.jam}</small>
@@ -284,14 +281,11 @@ function tampilkanRiwayat() {
   `).join("");
 }
 
-// Simpan notifikasi baru
 function simpanNotifikasi(nama, tanggal, jam) {
-
   if (!nama || !tanggal || !jam) return;
 
   const id = tanggal + "_" + nama;
 
-  // Cegah notifikasi yang sama tersimpan berulang
   if (riwayatNotifikasi.some(item => item.id === id)) {
     return;
   }
@@ -303,7 +297,6 @@ function simpanNotifikasi(nama, tanggal, jam) {
     jam: jam
   });
 
-  // Maksimal 50 riwayat
   riwayatNotifikasi = riwayatNotifikasi.slice(0, 50);
 
   try {
@@ -311,185 +304,191 @@ function simpanNotifikasi(nama, tanggal, jam) {
       "riwayatSmartJam",
       JSON.stringify(riwayatNotifikasi)
     );
-
     tampilkanRiwayat();
   } catch (e) {
     console.error("Gagal menyimpan riwayat:", e);
   }
 }
 
-// Hapus semua riwayat
 function hapusRiwayat() {
-  if (!confirm("Yakin ingin menghapus semua riwayat?")) {
-    return;
-  }
+  if (!confirm("Yakin ingin menghapus semua riwayat?")) return;
 
   riwayatNotifikasi = [];
-
   localStorage.removeItem("riwayatSmartJam");
-
   tampilkanRiwayat();
 }
 
-// Tampilkan data saat dashboard dibuka
 tampilkanRiwayat();
-  
+
 // ===== JAM DIGITAL =====
 function jalankanJam() {
   if (waktuDetik === null) return;
+
   waktuDetik = (waktuDetik + 1) % 86400;
+
   const jam = String(Math.floor(waktuDetik / 3600)).padStart(2, "0");
   const menit = String(Math.floor((waktuDetik % 3600) / 60)).padStart(2, "0");
   const detik = String(waktuDetik % 60).padStart(2, "0");
+
   document.getElementById("clock").textContent =
     `${jam}:${menit}:${detik}`;
 }
+
 setInterval(jalankanJam, 1000);
-// ===== STATUS KONEKSI =====
+
+// ===== STATUS KONEKSI MQTT =====
 function ubahStatus(teks, warna) {
   const status = document.getElementById("status");
   status.textContent = teks;
   status.style.color = warna;
 }
+
 // ===== KONEKSI MQTT =====
 function connectMQTT() {
- const usernameInput = document.getElementById("username");
-const passwordInput = document.getElementById("password");
+  if (typeof mqtt === "undefined") {
+    alert("Library MQTT belum berhasil dimuat. Periksa koneksi internet.");
+    return;
+  }
 
-if (!usernameInput || !passwordInput) {
-  console.error("Input username atau password tidak ditemukan!");
-  alert("Kolom username atau password tidak ditemukan.");
-  return;
-}
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value;
 
-const username = usernameInput.value.trim();
-const password = passwordInput.value;
-  
   if (!username || !password) {
     alert("Isi username dan password MQTT terlebih dahulu.");
     return;
   }
+
   if (client) {
     client.end(true);
     client = null;
   }
+
   ubahStatus("MENGHUBUNGKAN...", "#b45309");
-  console.log("MQTT library:", typeof mqtt);
-  console.log("Username terisi:", !!username);
-  console.log("Memulai koneksi MQTT...");
+
   client = mqtt.connect(
     "wss://i165de43.ala.asia-southeast1.emqxsl.com:8084/mqtt",
     {
       username: username,
       password: password,
-      clientId: "dashboard_" +
-        Math.random().toString(16).slice(2),
+      clientId: "dashboard_" + Math.random().toString(16).slice(2),
       clean: true,
       connectTimeout: 10000,
       reconnectPeriod: 3000
     }
   );
-  
-  // BERHASIL TERHUBUNG
+
   client.on("connect", function() {
     ubahStatus("TERHUBUNG", "#16a34a");
     console.log("MQTT berhasil terhubung.");
-    client.subscribe(
-      "smartjam/masjid/data",
-      { qos: 1 },
-      function(err) {
-        if (err) {
-          console.error("Subscribe gagal:", err);
-        } else {
-          console.log("Subscribe data berhasil.");
-        }
+
+    client.subscribe("smartjam/masjid/data", { qos: 1 }, function(err) {
+      if (err) {
+        console.error("Subscribe gagal:", err);
+      } else {
+        console.log("Subscribe data berhasil.");
       }
-    );
+    });
   });
-  // MENERIMA DATA ESP32
+
+  // ===== MENERIMA DATA ESP32 =====
   client.on("message", function(topic, message) {
+    if (topic !== "smartjam/masjid/data") return;
+
     lastDataReceived = Date.now();
+
     document.getElementById("lastReceived").textContent =
       new Date(lastDataReceived).toLocaleTimeString("id-ID");
+
     try {
       const data = JSON.parse(message.toString());
+
       if (data.jam) {
         const bagianWaktu = data.jam.split(":");
+
         if (bagianWaktu.length >= 2) {
           const h = Number(bagianWaktu[0]);
           const m = Number(bagianWaktu[1]);
           const s = Number(bagianWaktu[2] || 0);
+
           if (
             h >= 0 && h < 24 &&
             m >= 0 && m < 60 &&
             s >= 0 && s < 60
           ) {
             waktuDetik = h * 3600 + m * 60 + s;
-            const hh = String(h).padStart(2, "0");
-            const mm = String(m).padStart(2, "0");
+
             document.getElementById("clock").textContent =
-              `${hh}:${mm}:${String(s).padStart(2, "0")}`;
+              `${String(h).padStart(2, "0")}:` +
+              `${String(m).padStart(2, "0")}:` +
+              `${String(s).padStart(2, "0")}`;
           }
         }
       }
+
       document.getElementById("date").textContent =
         data.tanggal || "";
-      ["subuh", "zuhur", "ashar", "magrib", "isya"]
-        .forEach(function(key) {
-          document.getElementById(key).textContent =
-            data[key] || "--:--";
-        });
+
+      ["subuh", "zuhur", "ashar", "magrib", "isya"].forEach(function(key) {
+        document.getElementById(key).textContent =
+          data[key] || "--:--";
+      });
+
+      const alarmAktif =
+        data.alarm === true ||
+        data.alarm === 1 ||
+        data.alarm === "true";
+
       document.getElementById("alarm").textContent =
-        data.alarm ? "AKTIF" : "NONAKTIF";
+        alarmAktif ? "AKTIF" : "NONAKTIF";
+
       document.getElementById("notification").textContent =
-  data.notifikasi
-    ? "🔔 WAKTU SALAT TIBA: " + data.notifikasi
-    : "Belum ada waktu salat tiba";
+        data.notifikasi
+          ? "🔔 WAKTU SALAT TIBA: " + data.notifikasi
+          : "Belum ada waktu salat tiba";
 
-    // Simpan riwayat jika ada notifikasi baru
-    if (data.notifikasi) {
-    simpanNotifikasi(
-    data.notifikasi,
-    data.tanggal,
-    data.jam
-  );
-}
-
+      if (data.notifikasi) {
+        simpanNotifikasi(
+          data.notifikasi,
+          data.tanggal,
+          data.jam
+        );
+      }
 
       document.getElementById("raw").textContent =
         JSON.stringify(data, null, 2);
+
     } catch (e) {
       console.error("Format data tidak valid:", e);
       document.getElementById("raw").textContent =
         message.toString();
     }
   });
-  // ERROR
+
   client.on("error", function(err) {
-  console.error("MQTT ERROR:", err);
-  ubahStatus("KONEKSI ERROR", "#dc2626");
-});
-  // TERPUTUS
+    console.error("MQTT ERROR:", err);
+    ubahStatus("KONEKSI ERROR", "#dc2626");
+  });
+
   client.on("close", function() {
     ubahStatus("DISCONNECTED", "#dc2626");
   });
-  // RECONNECT
+
   client.on("reconnect", function() {
     ubahStatus("MENGHUBUNGKAN ULANG...", "#b45309");
   });
+
   client.on("offline", function() {
     ubahStatus("OFFLINE", "#dc2626");
   });
-  console.log("Status MQTT:", client.connected);
-
 }
 
 // ===== MENGIRIM PERINTAH =====
-function kirimPerintah(perintah) {
+function kirimPerintah(perintah, setelahBerhasil) {
   if (!client || !client.connected) {
     alert("MQTT belum terhubung!");
     return;
   }
+
   client.publish(
     "smartjam/masjid/control",
     perintah,
@@ -497,24 +496,32 @@ function kirimPerintah(perintah) {
     function(err) {
       if (err) {
         alert("Gagal mengirim perintah!");
+        console.error(err);
       } else {
-        alert("Perintah dikirim: " + perintah);
+        console.log("Perintah dikirim:", perintah);
+
+        if (typeof setelahBerhasil === "function") {
+          setelahBerhasil();
+        }
       }
     }
   );
 }
-// ===== TOMBOL KONTROL =====
+
+// ===== KENDALI ALARM =====
 function alarmON() {
   kirimPerintah("ALARM_ON");
 }
+
 function alarmOFF() {
   kirimPerintah("ALARM_OFF");
 }
+
 function testBuzzer() {
   kirimPerintah("TEST_BUZZER");
 }
 
-// ===== PENGATURAN DURASI BUZZER =====
+// ===== DURASI BUZZER =====
 function aturDurasi() {
   const durasi = Number(
     document.getElementById("durasiBuzzer").value
@@ -528,9 +535,8 @@ function aturDurasi() {
   kirimPerintah("DURASI:" + durasi);
 }
 
-
-// ===== PENGATURAN JADWAL SALAT MANUAL =====
-function kirimJadwalManual() {
+// ===== JADWAL MANUAL =====
+function kirimJadwalManual(setelahBerhasil) {
   const subuh = document.getElementById("subuhManual").value;
   const zuhur = document.getElementById("zuhurManual").value;
   const ashar = document.getElementById("asharManual").value;
@@ -545,22 +551,24 @@ function kirimJadwalManual() {
   const jadwal = "JADWAL:" +
     [subuh, zuhur, ashar, magrib, isya].join(",");
 
-  kirimPerintah(jadwal);
+  kirimPerintah(jadwal, setelahBerhasil);
 }
 
 // ===== MODE MANUAL =====
 function aktifkanModeManual() {
-  kirimJadwalManual();
+  kirimJadwalManual(function() {
+    document.getElementById("statusMode").textContent =
+      "Jadwal manual berhasil dikirim.";
+  });
 }
 
 // ===== MODE OTOMATIS =====
 function aktifkanModeOtomatis() {
-  kirimPerintah("MODE_AUTO");
-
-  document.getElementById("statusMode").innerText =
-    "Mode: OTOMATIS";
+  kirimPerintah("MODE_AUTO", function() {
+    document.getElementById("statusMode").textContent =
+      "Perintah mode OTOMATIS berhasil dikirim.";
+  });
 }
-
 </script>
 
 </body>
