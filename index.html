@@ -352,12 +352,7 @@ function connectMQTT() {
 
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value;
-
-  if (!username || !password) {
-    alert("Isi username dan password MQTT terlebih dahulu.");
-    return;
-  }
-
+  
   if (client) {
     client.end(true);
     client = null;
