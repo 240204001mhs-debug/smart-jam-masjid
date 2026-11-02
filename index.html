@@ -13,7 +13,7 @@
 * { box-sizing: border-box; }
 
 body {
-  margin: 0;</script>
+  margin: 0;
   padding: 20px;
   font-family: Arial, sans-serif;
   background: #eef2f7;
@@ -211,6 +211,33 @@ small { color: #64748b; }
   <p id="statusMode">Mode belum dipilih</p>
 </div>
 
+  <div class="panel">
+  <h3>📢 Pengumuman Masjid</h3>
+
+  <label>Tulis Pengumuman</label>
+  <textarea
+    id="teksPengumuman"
+    rows="4"
+    maxlength="250"
+    placeholder="Contoh: Salat Isya akan segera dimulai. Mohon rapatkan saf."
+    style="width:100%;padding:12px;border:1px solid #ccd3dc;border-radius:8px;font-family:Arial;"
+  ></textarea>
+
+  <button onclick="kirimPengumuman()">
+    KIRIM KE LAYAR TV
+  </button>
+
+  <button onclick="hapusPengumuman()"
+          style="background:#dc2626">
+    HAPUS PENGUMUMAN
+  </button>
+
+  <p id="statusPengumuman">
+    Belum ada pengumuman dikirim.
+  </p>
+</div>
+
+  
 <div class="panel">
   <h3>Data MQTT Terakhir</h3>
   <pre id="raw">Belum ada data.</pre>
@@ -387,7 +414,14 @@ function connectMQTT() {
 
   // ===== MENERIMA DATA ESP32 =====
   client.on("message", function(topic, message) {
-    if (topic !== "smartjam/masjid/data") return;
+    if (topic === "smartjam/masjid/runningtext") {
+    const teks = message.toString();
+
+    document.querySelector(".running-text-content").textContent = teks;
+    return;
+}
+
+if (topic !== "smartjam/masjid/data") return;
 
     lastDataReceived = Date.now();
 
@@ -564,6 +598,66 @@ function aktifkanModeOtomatis() {
       "Perintah mode OTOMATIS berhasil dikirim.";
   });
 }
+
+  // ===== PENGUMUMAN RUNNING TEXT =====
+
+function kirimPengumuman() {
+  const kolom = document.getElementById("teksPengumuman");
+  const teks = kolom.value.trim();
+
+  if (!teks) {
+    alert("Silakan tulis pengumuman terlebih dahulu!");
+    return;
+  }
+
+  if (!client || !client.connected) {
+    alert("MQTT belum terhubung!");
+    return;
+  }
+
+  client.publish(
+    "smartjam/masjid/runningtext",
+    teks,
+    { qos: 1, retain: true },
+    function(err) {
+      if (err) {
+        document.getElementById("statusPengumuman").textContent =
+          "Gagal mengirim pengumuman.";
+        return;
+      }
+
+      document.getElementById("statusPengumuman").textContent =
+        "Pengumuman berhasil dikirim ke TV!";
+
+      alert("Pengumuman berhasil dikirim!");
+    }
+  );
+}
+
+function hapusPengumuman() {
+  if (!client || !client.connected) {
+    alert("MQTT belum terhubung!");
+    return;
+  }
+
+  client.publish(
+    "smartjam/masjid/runningtext",
+    " ",
+    { qos: 1, retain: true },
+    function(err) {
+      if (err) {
+        alert("Gagal menghapus pengumuman.");
+        return;
+      }
+
+      document.getElementById("teksPengumuman").value = "";
+      document.getElementById("statusPengumuman").textContent =
+        "Pengumuman berhasil dihapus.";
+    }
+  );
+}
+
+  
 </script>
 
 </body>
