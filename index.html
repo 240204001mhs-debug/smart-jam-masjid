@@ -662,6 +662,28 @@ function hapusPengumuman() {
     return;
   }
 
+  <hr>
+
+<h3>⚡ Kecepatan Running Text</h3>
+
+<label>Durasi Gerakan (detik)</label>
+
+<input
+  type="number"
+  id="kecepatanRunningText"
+  value="25"
+  min="5"
+  max="60"
+>
+
+<button onclick="aturKecepatanRunningText()">
+  SIMPAN KECEPATAN
+</button>
+
+<p id="statusKecepatan">
+  Kecepatan standar: 25 detik
+</p>
+
   client.publish(
     "smartjam/masjid/runningtext",
     " ",
@@ -679,6 +701,42 @@ function hapusPengumuman() {
   );
 }
 
+  // ===== PENGATURAN KECEPATAN RUNNING TEXT =====
+
+function aturKecepatanRunningText() {
+    const kecepatan = Number(
+        document.getElementById("kecepatanRunningText").value
+    );
+
+    if (!Number.isInteger(kecepatan) ||
+        kecepatan < 5 ||
+        kecepatan > 60) {
+        alert("Masukkan angka antara 5 sampai 60 detik!");
+        return;
+    }
+
+    if (!client || !client.connected) {
+        alert("MQTT belum terhubung!");
+        return;
+    }
+
+    client.publish(
+        "smartjam/masjid/kecepatan",
+        String(kecepatan),
+        { qos: 1, retain: true },
+        function(err) {
+            if (err) {
+                alert("Gagal mengatur kecepatan!");
+                return;
+            }
+
+            document.getElementById("statusKecepatan").textContent =
+                "Kecepatan berhasil diatur: " + kecepatan + " detik";
+
+            alert("Kecepatan running text berhasil diubah!");
+        }
+    );
+}
   
 </script>
 
