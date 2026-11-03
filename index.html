@@ -1,33 +1,44 @@
-
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Smart Jam Masjid IoT</title>
+<title>Panel Kendali Smart Jam Masjid</title>
 
-<!-- Library MQTT.js harus berada di bagian HEAD -->
+<!-- Pustaka MQTT.js -->
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
 
 <style>
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+}
 
 body {
   margin: 0;
   padding: 20px;
   font-family: Arial, sans-serif;
-  background: #eef2f7;
+  background: #031d1b;
   color: #172033;
 }
 
-.container { max-width: 650px; margin: auto; }
+.container {
+  max-width: 650px;
+  margin: auto;
+}
 
 header {
-  background: #075e49;
+  background: linear-gradient(135deg, #064e3b, #047857);
   color: white;
   padding: 22px;
   border-radius: 16px;
   text-align: center;
+  border: 1px solid #d4af37;
+}
+
+header h2 {
+  color: #f5d77b;
+  margin-top: 0;
 }
 
 .panel {
@@ -35,23 +46,36 @@ header {
   padding: 20px;
   margin-top: 16px;
   border-radius: 15px;
-  box-shadow: 0 3px 12px #0001;
+  box-shadow: 0 3px 12px #0002;
 }
 
-.clock { text-align: center; }
-#clock { font-size: 42px; font-weight: bold; }
+.panel h3 {
+  color: #075e49;
+  margin-top: 0;
+}
+
+.clock {
+  text-align: center;
+}
+
+#clock {
+  font-size: 42px;
+  font-weight: bold;
+  color: #075e49;
+}
 
 .status {
   font-weight: bold;
   color: #b45309;
 }
 
-input, button {
+input, button, textarea {
   width: 100%;
   padding: 12px;
   margin: 6px 0;
   border: 1px solid #ccd3dc;
   border-radius: 8px;
+  font-family: Arial, sans-serif;
 }
 
 button {
@@ -65,6 +89,10 @@ button {
 button:disabled {
   background: #94a3b8;
   cursor: not-allowed;
+}
+
+button:hover {
+  opacity: 0.9;
 }
 
 .row {
@@ -82,7 +110,22 @@ pre {
   border-radius: 8px;
 }
 
-small { color: #64748b; }
+small {
+  color: #64748b;
+}
+
+label {
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #334155;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 20px 0;
+}
 </style>
 </head>
 
@@ -91,18 +134,18 @@ small { color: #64748b; }
 
 <header>
   <h2>SMART JAM MASJID</h2>
-  <p>Dashboard Internet of Things</p>
+  <p>Panel Kendali Internet of Things</p>
   <div id="status" class="status">BELUM TERHUBUNG</div>
 </header>
 
 <div class="panel clock">
-  <small>WAKTU SEKARANG</small>
+  <small>WAKTU SAAT INI</small>
   <div id="clock">--:--:--</div>
-  <div id="date">Menunggu data ESP32</div>
+  <div id="date">Menunggu data dari ESP32</div>
 </div>
 
 <div class="panel">
-  <h3>Jadwal Waktu Salat</h3>
+  <h3>🕌 Jadwal Waktu Salat</h3>
   <div class="row"><span>Subuh</span><b id="subuh">--:--</b></div>
   <div class="row"><span>Zuhur</span><b id="zuhur">--:--</b></div>
   <div class="row"><span>Asar</span><b id="ashar">--:--</b></div>
@@ -112,7 +155,7 @@ small { color: #64748b; }
 
 <div class="panel">
   <h3>🔔 Notifikasi Waktu Salat</h3>
-  <p id="notification">Belum ada waktu salat tiba</p>
+  <p id="notification">Belum ada waktu salat yang tiba.</p>
 </div>
 
 <div class="panel">
@@ -121,36 +164,42 @@ small { color: #64748b; }
     <p>Belum ada riwayat notifikasi.</p>
   </div>
   <button onclick="hapusRiwayat()" style="background:#dc2626">
-    HAPUS RIWAYAT
+    HAPUS RIWAYAT NOTIFIKASI
   </button>
 </div>
 
 <div class="panel">
-  <h3>Koneksi MQTT EMQX</h3>
+  <h3>🔗 Koneksi Perangkat</h3>
 
-  <label>Username MQTT</label>
-  <input type="text" id="username" placeholder="Username MQTT">
+  <label>Nama Pengguna MQTT</label>
+  <input type="text" id="username"
+         placeholder="Masukkan nama pengguna MQTT">
 
-<input type="password" id="password" placeholder="Password MQTT">
+  <label>Kata Sandi MQTT</label>
+  <input type="password" id="password"
+         placeholder="Masukkan kata sandi MQTT">
+
   <button type="button" onclick="connectMQTT()">
-    HUBUNGKAN KE EMQX
+    HUBUNGKAN PERANGKAT
   </button>
 
   <p><small>
     Gunakan akun MQTT khusus dashboard dengan izin membaca data
-    dan mengirim perintah kontrol.
+    dan mengirim perintah kendali.
   </small></p>
 </div>
 
 <div class="panel">
-  <h3>Status Alarm</h3>
-  <p id="alarm">Menunggu data...</p>
+  <h3>🔔 Status Alarm</h3>
+  <p id="alarm">Menunggu data dari perangkat...</p>
 </div>
 
 <div class="panel">
   <h3>📡 Status Perangkat ESP32</h3>
   <p>Status:
-    <b id="deviceStatus" style="color:#b45309">MENUNGGU DATA</b>
+    <b id="deviceStatus" style="color:#b45309">
+      MENUNGGU DATA
+    </b>
   </p>
   <p>Terakhir menerima data:
     <b id="lastReceived">Belum ada data</b>
@@ -158,19 +207,21 @@ small { color: #64748b; }
 </div>
 
 <div class="panel">
-  <h3>Kendali Alarm Masjid</h3>
+  <h3>🎛️ Kendali Alarm Masjid</h3>
 
-  <button onclick="alarmON()">ALARM ON</button>
-  <button onclick="alarmOFF()">ALARM OFF</button>
-  <button onclick="testBuzzer()">TEST BUZZER</button>
+  <button onclick="alarmON()">AKTIFKAN ALARM</button>
+  <button onclick="alarmOFF()">MATIKAN ALARM</button>
+  <button onclick="testBuzzer()">UJI BEL</button>
 
   <hr>
 
-  <h3>⏱️ Pengaturan Durasi Buzzer</h3>
+  <h3>⏱️ Pengaturan Durasi Bel</h3>
+
+  <label>Durasi Bunyi (milidetik)</label>
   <input type="number" id="durasiBuzzer"
          value="2000" min="100" max="10000" step="100">
 
-  <button onclick="aturDurasi()">SIMPAN DURASI</button>
+  <button onclick="aturDurasi()">SIMPAN DURASI BEL</button>
 
   <hr>
 
@@ -197,34 +248,33 @@ small { color: #64748b; }
 </div>
 
 <div class="panel">
-  <h3>⚙️ Mode Jadwal Salat</h3>
+  <h3>⚙️ Mode Pengaturan Jadwal</h3>
 
   <button onclick="aktifkanModeManual()">
-    MODE MANUAL
+    AKTIFKAN MODE MANUAL
   </button>
 
   <button onclick="aktifkanModeOtomatis()"
           style="background:#16a34a">
-    MODE OTOMATIS
+    AKTIFKAN MODE OTOMATIS
   </button>
 
-  <p id="statusMode">Mode belum dipilih</p>
+  <p id="statusMode">Mode jadwal belum dipilih.</p>
 </div>
 
-  <div class="panel">
+<div class="panel">
   <h3>📢 Pengumuman Masjid</h3>
 
-  <label>Tulis Pengumuman</label>
+  <label>Tulis Isi Pengumuman</label>
   <textarea
     id="teksPengumuman"
     rows="4"
     maxlength="250"
     placeholder="Contoh: Salat Isya akan segera dimulai. Mohon rapatkan saf."
-    style="width:100%;padding:12px;border:1px solid #ccd3dc;border-radius:8px;font-family:Arial;"
   ></textarea>
 
   <button onclick="kirimPengumuman()">
-    KIRIM KE LAYAR TV
+    KIRIM PENGUMUMAN KE LAYAR TV
   </button>
 
   <button onclick="hapusPengumuman()"
@@ -232,37 +282,36 @@ small { color: #64748b; }
     HAPUS PENGUMUMAN
   </button>
 
-    <hr>
+  <hr>
 
-<h3>⚡ Kecepatan Running Text</h3>
+  <h3>⚡ Kecepatan Teks Berjalan</h3>
 
-<label>Durasi Gerakan (detik)</label>
+  <label>Durasi Gerakan (detik)</label>
 
-<input
-  type="number"
-  id="kecepatanRunningText"
-  value="25"
-  min="5"
-  max="60"
->
+  <input
+    type="number"
+    id="kecepatanRunningText"
+    value="25"
+    min="5"
+    max="60"
+  >
 
-<button onclick="aturKecepatanRunningText()">
-  SIMPAN KECEPATAN
-</button>
+  <button onclick="aturKecepatanRunningText()">
+    SIMPAN PENGATURAN KECEPATAN
+  </button>
 
-<p id="statusKecepatan">
-  Kecepatan standar: 25 detik
-</p>
+  <p id="statusKecepatan">
+    Kecepatan standar: 25 detik.
+  </p>
 
   <p id="statusPengumuman">
-    Belum ada pengumuman dikirim.
+    Belum ada pengumuman yang dikirim.
   </p>
 </div>
 
-  
 <div class="panel">
-  <h3>Data MQTT Terakhir</h3>
-  <pre id="raw">Belum ada data.</pre>
+  <h3>📡 Data MQTT Terakhir</h3>
+  <pre id="raw">Belum ada data yang diterima.</pre>
 </div>
 
 </div>
@@ -272,7 +321,7 @@ let client = null;
 let waktuDetik = null;
 let lastDataReceived = 0;
 
-// ===== STATUS ESP32 =====
+// ===== MEMERIKSA STATUS ESP32 =====
 function periksaStatusESP32() {
   const status = document.getElementById("deviceStatus");
 
@@ -355,7 +404,7 @@ function simpanNotifikasi(nama, tanggal, jam) {
 }
 
 function hapusRiwayat() {
-  if (!confirm("Yakin ingin menghapus semua riwayat?")) return;
+  if (!confirm("Yakin ingin menghapus semua riwayat notifikasi?")) return;
 
   riwayatNotifikasi = [];
   localStorage.removeItem("riwayatSmartJam");
@@ -389,12 +438,11 @@ function ubahStatus(teks, warna) {
 
 // ===== KONEKSI MQTT =====
 function connectMQTT() {
-  
   const usernameInput = document.getElementById("username");
   const passwordInput = document.getElementById("password");
 
   if (!usernameInput || !passwordInput) {
-    alert("Kolom username atau password tidak ditemukan!");
+    alert("Kolom nama pengguna atau kata sandi tidak ditemukan!");
     return;
   }
 
@@ -402,11 +450,14 @@ function connectMQTT() {
   const password = passwordInput.value;
 
   if (!username || !password) {
-    alert("Isi username dan password MQTT terlebih dahulu.");
+    alert("Isi nama pengguna dan kata sandi MQTT terlebih dahulu.");
     return;
   }
 
-  // LANJUTKAN KODE MQTT LAMA DI SINI
+  if (client) {
+    client.end(true);
+  }
+
   ubahStatus("MENGHUBUNGKAN...", "#b45309");
 
   client = mqtt.connect(
@@ -424,26 +475,19 @@ function connectMQTT() {
   client.on("connect", function() {
     ubahStatus("TERHUBUNG", "#16a34a");
     console.log("MQTT berhasil terhubung.");
- 
+
     client.subscribe("smartjam/masjid/data", { qos: 1 }, function(err) {
       if (err) {
-        console.error("Subscribe gagal:", err);
+        console.error("Gagal berlangganan data:", err);
       } else {
-        console.log("Subscribe data berhasil.");
+        console.log("Berhasil menerima data Smart Jam Masjid.");
       }
     });
   });
 
   // ===== MENERIMA DATA ESP32 =====
   client.on("message", function(topic, message) {
-    if (topic === "smartjam/masjid/runningtext") {
-    const teks = message.toString();
-
-    document.querySelector(".running-text-content").textContent = teks;
-    return;
-}
-
-if (topic !== "smartjam/masjid/data") return;
+    if (topic !== "smartjam/masjid/data") return;
 
     lastDataReceived = Date.now();
 
@@ -495,7 +539,7 @@ if (topic !== "smartjam/masjid/data") return;
       document.getElementById("notification").textContent =
         data.notifikasi
           ? "🔔 WAKTU SALAT TIBA: " + data.notifikasi
-          : "Belum ada waktu salat tiba";
+          : "Belum ada waktu salat yang tiba.";
 
       if (data.notifikasi) {
         simpanNotifikasi(
@@ -516,12 +560,12 @@ if (topic !== "smartjam/masjid/data") return;
   });
 
   client.on("error", function(err) {
-    console.error("MQTT ERROR:", err);
-    ubahStatus("KONEKSI ERROR", "#dc2626");
+    console.error("Kesalahan MQTT:", err);
+    ubahStatus("KESALAHAN KONEKSI", "#dc2626");
   });
 
   client.on("close", function() {
-    ubahStatus("DISCONNECTED", "#dc2626");
+    ubahStatus("TERPUTUS", "#dc2626");
   });
 
   client.on("reconnect", function() {
@@ -533,7 +577,7 @@ if (topic !== "smartjam/masjid/data") return;
   });
 }
 
-// ===== MENGIRIM PERINTAH =====
+// ===== MENGIRIM PERINTAH KE ESP32 =====
 function kirimPerintah(perintah, setelahBerhasil) {
   if (!client || !client.connected) {
     alert("MQTT belum terhubung!");
@@ -549,7 +593,7 @@ function kirimPerintah(perintah, setelahBerhasil) {
         alert("Gagal mengirim perintah!");
         console.error(err);
       } else {
-        console.log("Perintah dikirim:", perintah);
+        console.log("Perintah berhasil dikirim:", perintah);
 
         if (typeof setelahBerhasil === "function") {
           setelahBerhasil();
@@ -572,21 +616,21 @@ function testBuzzer() {
   kirimPerintah("TEST_BUZZER");
 }
 
-// ===== DURASI BUZZER =====
+// ===== PENGATURAN DURASI BEL =====
 function aturDurasi() {
   const durasi = Number(
     document.getElementById("durasiBuzzer").value
   );
 
   if (!Number.isInteger(durasi) || durasi < 100 || durasi > 10000) {
-    alert("Durasi harus antara 100 sampai 10000 ms!");
+    alert("Durasi harus antara 100 sampai 10000 milidetik!");
     return;
   }
 
   kirimPerintah("DURASI:" + durasi);
 }
 
-// ===== JADWAL MANUAL =====
+// ===== PENGATURAN JADWAL MANUAL =====
 function kirimJadwalManual(setelahBerhasil) {
   const subuh = document.getElementById("subuhManual").value;
   const zuhur = document.getElementById("zuhurManual").value;
@@ -617,12 +661,11 @@ function aktifkanModeManual() {
 function aktifkanModeOtomatis() {
   kirimPerintah("MODE_AUTO", function() {
     document.getElementById("statusMode").textContent =
-      "Perintah mode OTOMATIS berhasil dikirim.";
+      "Perintah mode otomatis berhasil dikirim.";
   });
 }
 
-  // ===== PENGUMUMAN RUNNING TEXT =====
-
+// ===== PENGUMUMAN MASJID =====
 function kirimPengumuman() {
   const kolom = document.getElementById("teksPengumuman");
   const teks = kolom.value.trim();
@@ -649,40 +692,19 @@ function kirimPengumuman() {
       }
 
       document.getElementById("statusPengumuman").textContent =
-        "Pengumuman berhasil dikirim ke TV!";
+        "Pengumuman berhasil dikirim ke layar TV!";
 
-      alert("Pengumuman berhasil dikirim!");
+      alert("Pengumuman berhasil dikirim ke layar TV!");
     }
   );
 }
 
+// ===== MENGHAPUS PENGUMUMAN =====
 function hapusPengumuman() {
   if (!client || !client.connected) {
     alert("MQTT belum terhubung!");
     return;
   }
-
-  <hr>
-
-<h3>⚡ Kecepatan Running Text</h3>
-
-<label>Durasi Gerakan (detik)</label>
-
-<input
-  type="number"
-  id="kecepatanRunningText"
-  value="25"
-  min="5"
-  max="60"
->
-
-<button onclick="aturKecepatanRunningText()">
-  SIMPAN KECEPATAN
-</button>
-
-<p id="statusKecepatan">
-  Kecepatan standar: 25 detik
-</p>
 
   client.publish(
     "smartjam/masjid/runningtext",
@@ -697,48 +719,51 @@ function hapusPengumuman() {
       document.getElementById("teksPengumuman").value = "";
       document.getElementById("statusPengumuman").textContent =
         "Pengumuman berhasil dihapus.";
+
+      alert("Pengumuman berhasil dihapus!");
     }
   );
 }
 
-  // ===== PENGATURAN KECEPATAN RUNNING TEXT =====
-
+// ===== PENGATURAN KECEPATAN TEKS BERJALAN =====
 function aturKecepatanRunningText() {
-    const kecepatan = Number(
-        document.getElementById("kecepatanRunningText").value
-    );
+  const kecepatan = Number(
+    document.getElementById("kecepatanRunningText").value
+  );
 
-    if (!Number.isInteger(kecepatan) ||
-        kecepatan < 5 ||
-        kecepatan > 60) {
-        alert("Masukkan angka antara 5 sampai 60 detik!");
+  if (
+    !Number.isInteger(kecepatan) ||
+    kecepatan < 5 ||
+    kecepatan > 60
+  ) {
+    alert("Masukkan angka antara 5 sampai 60 detik!");
+    return;
+  }
+
+  if (!client || !client.connected) {
+    alert("MQTT belum terhubung!");
+    return;
+  }
+
+  client.publish(
+    "smartjam/masjid/kecepatan",
+    String(kecepatan),
+    { qos: 1, retain: true },
+    function(err) {
+      if (err) {
+        alert("Gagal mengatur kecepatan teks berjalan!");
         return;
+      }
+
+      document.getElementById("statusKecepatan").textContent =
+        "Kecepatan berhasil diatur: " + kecepatan + " detik.";
+
+      alert("Kecepatan teks berjalan berhasil diubah!");
     }
-
-    if (!client || !client.connected) {
-        alert("MQTT belum terhubung!");
-        return;
-    }
-
-    client.publish(
-        "smartjam/masjid/kecepatan",
-        String(kecepatan),
-        { qos: 1, retain: true },
-        function(err) {
-            if (err) {
-                alert("Gagal mengatur kecepatan!");
-                return;
-            }
-
-            document.getElementById("statusKecepatan").textContent =
-                "Kecepatan berhasil diatur: " + kecepatan + " detik";
-
-            alert("Kecepatan running text berhasil diubah!");
-        }
-    );
+  );
 }
-  
 </script>
 
 </body>
 </html>
+```
