@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -8,6 +7,8 @@
 
 <!-- Pustaka MQTT.js -->
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<!-- Pustaka SunCalc untuk LunarView -->
+<script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
 
 <style>
 * {
@@ -126,6 +127,80 @@ hr {
   border-top: 1px solid #e2e8f0;
   margin: 20px 0;
 }
+
+/* ===== PANEL LUNARVIEW ===== */
+.lunar-view {
+  text-align: center;
+}
+
+.lunar-icon {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.lunar-phase {
+  font-size: 22px;
+  font-weight: bold;
+  color: #075e49;
+  margin-bottom: 6px;
+}
+
+.lunar-detail {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.lunar-detail div {
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.lunar-detail span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.lunar-detail b {
+  font-size: 18px;
+  color: #075e49;
+}
+
+.lunar-status {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+/* ===== TOAST NOTIFICATION ===== */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(120px);
+  background: #087a5b;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 10px;
+  font-weight: bold;
+  box-shadow: 0 4px 18px #0004;
+  transition: transform 0.3s ease;
+  z-index: 99999;
+  max-width: 90%;
+  text-align: center;
+}
+
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+#toast.error {
+  background: #dc2626;
+}
 </style>
 </head>
 
@@ -139,9 +214,31 @@ hr {
 </header>
 
 <div class="panel clock">
-  <small>WAKTU SAAT INI</small>
+  <small>WAKTU SAAT INI (WITA)</small>
   <div id="clock">--:--:--</div>
   <div id="date">Menunggu data dari ESP32</div>
+</div>
+
+<!-- ===== PANEL LUNARVIEW ===== -->
+<div class="panel lunar-view">
+  <h3>🌙 Informasi Bulan (LunarView)</h3>
+  <div class="lunar-icon" id="lunarIcon">🌙</div>
+  <div class="lunar-phase" id="lunarPhase">Menghitung...</div>
+
+  <div class="lunar-detail">
+    <div>
+      <span>ILUMINASI</span>
+      <b id="lunarIllumination">--%</b>
+    </div>
+    <div>
+      <span>UMUR BULAN</span>
+      <b id="lunarAge">-- hari</b>
+    </div>
+  </div>
+
+  <div class="lunar-status" id="lunarStatus">
+    Waktu perhitungan: menunggu...
+  </div>
 </div>
 
 <div class="panel">
@@ -173,11 +270,13 @@ hr {
 
   <label>Nama Pengguna MQTT</label>
   <input type="text" id="username"
-         placeholder="Masukkan nama pengguna MQTT">
+         placeholder="Masukkan nama pengguna MQTT"
+         autocomplete="username">
 
   <label>Kata Sandi MQTT</label>
   <input type="password" id="password"
-         placeholder="Masukkan kata sandi MQTT">
+         placeholder="Masukkan kata sandi MQTT"
+         autocomplete="current-password">
 
   <button type="button" onclick="connectMQTT()">
     HUBUNGKAN PERANGKAT
@@ -316,10 +415,27 @@ hr {
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
-  
+<!-- TOAST -->
+<div id="toast"></div>
+
 <script>
 
+// =====================================
+// TOAST NOTIFICATION (pengganti alert)
+// =====================================
+
+let toastTimer = null;
+
+function tampilkanToast(pesan, tipe) {
+  const toast = document.getElementById("toast");
+  toast.textContent = pesan;
+  toast.className = tipe === "error" ? "show error" : "show";
+
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function() {
+    toast.className = "";
+  }, 3000);
+}
 
 // =====================================
 // LUNARVIEW - PERHITUNGAN FASE BULAN
@@ -331,10 +447,7 @@ function hitungFaseBulan() {
     return null;
   }
 
-  // Mengambil waktu aktual perangkat
   const sekarang = new Date();
-
-  // Menghitung fase dan iluminasi Bulan
   const dataBulan = SunCalc.getMoonIllumination(sekarang);
 
   const daftarFase = [
@@ -348,18 +461,16 @@ function hitungFaseBulan() {
     "Sabit Tua"
   ];
 
-  // Fase astronomis dalam rentang 0 sampai 1
+  const daftarIkon = ["🌑", "🌒", "🌓", "🌔", "🌕", "🌖", "🌗", "🌘"];
+
   const indeksFase = Math.round(dataBulan.phase * 8) % 8;
-
-  // Persentase permukaan Bulan yang terang
   const iluminasi = dataBulan.fraction * 100;
-
-  // Perkiraan umur Bulan sejak konjungsi terakhir
   const umurBulan = dataBulan.phase * 29.530588853;
 
   return {
     waktu: sekarang,
     fase: daftarFase[indeksFase],
+    ikon: daftarIkon[indeksFase],
     faseNilai: dataBulan.phase,
     iluminasi: iluminasi,
     umur: umurBulan,
@@ -367,25 +478,47 @@ function hitungFaseBulan() {
   };
 }
 
-// =====================================
-// TES HASIL PERHITUNGAN
-// =====================================
+function tampilkanLunarViewPanel() {
+  const faseEl = document.getElementById("lunarPhase");
+  const ikonEl = document.getElementById("lunarIcon");
+  const illumEl = document.getElementById("lunarIllumination");
+  const umurEl = document.getElementById("lunarAge");
+  const statusEl = document.getElementById("lunarStatus");
 
-function tesLunarView() {
+  if (!faseEl) return;
+
   const hasil = hitungFaseBulan();
 
-  if (!hasil) return;
+  if (!hasil) {
+    faseEl.textContent = "Tidak tersedia";
+    ikonEl.textContent = "🌙";
+    illumEl.textContent = "--%";
+    umurEl.textContent = "-- hari";
+    statusEl.textContent =
+      "Library SunCalc gagal dimuat. Periksa koneksi internet.";
+    return;
+  }
 
-  console.log("===== LUNARVIEW =====");
-  console.log("Waktu:", hasil.waktu.toLocaleString("id-ID"));
-  console.log("Fase:", hasil.fase);
-  console.log("Iluminasi:", hasil.iluminasi.toFixed(2) + "%");
-  console.log("Umur Bulan:", hasil.umur.toFixed(2) + " hari");
-  console.log("Sedang membesar:", hasil.waxing);
+  ikonEl.textContent = hasil.ikon;
+  faseEl.textContent = hasil.fase;
+  illumEl.textContent = hasil.iluminasi.toFixed(1) + "%";
+  umurEl.textContent = hasil.umur.toFixed(1) + " hari";
+
+  statusEl.textContent =
+    "Waktu perhitungan: " +
+    hasil.waktu.toLocaleString("id-ID") +
+    " • " +
+    (hasil.waxing ? "Bulan sedang membesar" : "Bulan sedang mengecil");
 }
 
+// Panggil saat halaman dimuat & refresh setiap 1 jam
+tampilkanLunarViewPanel();
+setInterval(tampilkanLunarViewPanel, 3600000);
 
-  
+// =====================================
+// STATE
+// =====================================
+
 let client = null;
 let waktuDetik = null;
 let lastDataReceived = 0;
@@ -511,7 +644,7 @@ function connectMQTT() {
   const passwordInput = document.getElementById("password");
 
   if (!usernameInput || !passwordInput) {
-    alert("Kolom nama pengguna atau kata sandi tidak ditemukan!");
+    tampilkanToast("Kolom nama pengguna atau kata sandi tidak ditemukan!", "error");
     return;
   }
 
@@ -519,7 +652,7 @@ function connectMQTT() {
   const password = passwordInput.value;
 
   if (!username || !password) {
-    alert("Isi nama pengguna dan kata sandi MQTT terlebih dahulu.");
+    tampilkanToast("Isi nama pengguna dan kata sandi MQTT terlebih dahulu.", "error");
     return;
   }
 
@@ -543,6 +676,7 @@ function connectMQTT() {
 
   client.on("connect", function() {
     ubahStatus("TERHUBUNG", "#16a34a");
+    tampilkanToast("MQTT berhasil terhubung.");
     console.log("MQTT berhasil terhubung.");
 
     client.subscribe("smartjam/masjid/data", { qos: 1 }, function(err) {
@@ -579,12 +713,19 @@ function connectMQTT() {
             m >= 0 && m < 60 &&
             s >= 0 && s < 60
           ) {
-            waktuDetik = h * 3600 + m * 60 + s;
+            const waktuBaru = h * 3600 + m * 60 + s;
 
-            document.getElementById("clock").textContent =
-              `${String(h).padStart(2, "0")}:` +
-              `${String(m).padStart(2, "0")}:` +
-              `${String(s).padStart(2, "0")}`;
+            // Hanya reset jika selisih > 2 detik,
+            // supaya jam tidak "loncat" saat update dari ESP32
+            if (waktuDetik === null ||
+                Math.abs(waktuBaru - waktuDetik) > 2) {
+              waktuDetik = waktuBaru;
+
+              document.getElementById("clock").textContent =
+                `${String(h).padStart(2, "0")}:` +
+                `${String(m).padStart(2, "0")}:` +
+                `${String(s).padStart(2, "0")}`;
+            }
           }
         }
       }
@@ -649,7 +790,7 @@ function connectMQTT() {
 // ===== MENGIRIM PERINTAH KE ESP32 =====
 function kirimPerintah(perintah, setelahBerhasil) {
   if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
+    tampilkanToast("MQTT belum terhubung!", "error");
     return;
   }
 
@@ -659,7 +800,7 @@ function kirimPerintah(perintah, setelahBerhasil) {
     { qos: 1 },
     function(err) {
       if (err) {
-        alert("Gagal mengirim perintah!");
+        tampilkanToast("Gagal mengirim perintah!", "error");
         console.error(err);
       } else {
         console.log("Perintah berhasil dikirim:", perintah);
@@ -674,15 +815,21 @@ function kirimPerintah(perintah, setelahBerhasil) {
 
 // ===== KENDALI ALARM =====
 function alarmON() {
-  kirimPerintah("ALARM_ON");
+  kirimPerintah("ALARM_ON", function() {
+    tampilkanToast("Perintah aktifkan alarm dikirim.");
+  });
 }
 
 function alarmOFF() {
-  kirimPerintah("ALARM_OFF");
+  kirimPerintah("ALARM_OFF", function() {
+    tampilkanToast("Perintah matikan alarm dikirim.");
+  });
 }
 
 function testBuzzer() {
-  kirimPerintah("TEST_BUZZER");
+  kirimPerintah("TEST_BUZZER", function() {
+    tampilkanToast("Perintah uji bel dikirim.");
+  });
 }
 
 // ===== PENGATURAN DURASI BEL =====
@@ -692,11 +839,13 @@ function aturDurasi() {
   );
 
   if (!Number.isInteger(durasi) || durasi < 100 || durasi > 10000) {
-    alert("Durasi harus antara 100 sampai 10000 milidetik!");
+    tampilkanToast("Durasi harus antara 100 sampai 10000 milidetik!", "error");
     return;
   }
 
-  kirimPerintah("DURASI:" + durasi);
+  kirimPerintah("DURASI:" + durasi, function() {
+    tampilkanToast("Durasi bel disimpan: " + durasi + " ms.");
+  });
 }
 
 // ===== PENGATURAN JADWAL MANUAL =====
@@ -708,14 +857,16 @@ function kirimJadwalManual(setelahBerhasil) {
   const isya = document.getElementById("isyaManual").value;
 
   if (!subuh || !zuhur || !ashar || !magrib || !isya) {
-    alert("Semua jadwal salat harus diisi!");
+    tampilkanToast("Semua jadwal salat harus diisi!", "error");
     return;
   }
 
   const jadwal = "JADWAL:" +
     [subuh, zuhur, ashar, magrib, isya].join(",");
 
-  kirimPerintah(jadwal, setelahBerhasil);
+  kirimPerintah(jadwal, setelahBerhasil || function() {
+    tampilkanToast("Jadwal salat berhasil dikirim.");
+  });
 }
 
 // ===== MODE MANUAL =====
@@ -723,6 +874,7 @@ function aktifkanModeManual() {
   kirimJadwalManual(function() {
     document.getElementById("statusMode").textContent =
       "Jadwal manual berhasil dikirim.";
+    tampilkanToast("Mode manual diaktifkan.");
   });
 }
 
@@ -731,6 +883,7 @@ function aktifkanModeOtomatis() {
   kirimPerintah("MODE_AUTO", function() {
     document.getElementById("statusMode").textContent =
       "Perintah mode otomatis berhasil dikirim.";
+    tampilkanToast("Mode otomatis diaktifkan.");
   });
 }
 
@@ -740,12 +893,12 @@ function kirimPengumuman() {
   const teks = kolom.value.trim();
 
   if (!teks) {
-    alert("Silakan tulis pengumuman terlebih dahulu!");
+    tampilkanToast("Silakan tulis pengumuman terlebih dahulu!", "error");
     return;
   }
 
   if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
+    tampilkanToast("MQTT belum terhubung!", "error");
     return;
   }
 
@@ -757,13 +910,14 @@ function kirimPengumuman() {
       if (err) {
         document.getElementById("statusPengumuman").textContent =
           "Gagal mengirim pengumuman.";
+        tampilkanToast("Gagal mengirim pengumuman.", "error");
         return;
       }
 
       document.getElementById("statusPengumuman").textContent =
         "Pengumuman berhasil dikirim ke layar TV!";
 
-      alert("Pengumuman berhasil dikirim ke layar TV!");
+      tampilkanToast("Pengumuman berhasil dikirim ke layar TV!");
     }
   );
 }
@@ -771,7 +925,7 @@ function kirimPengumuman() {
 // ===== MENGHAPUS PENGUMUMAN =====
 function hapusPengumuman() {
   if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
+    tampilkanToast("MQTT belum terhubung!", "error");
     return;
   }
 
@@ -781,7 +935,7 @@ function hapusPengumuman() {
     { qos: 1, retain: true },
     function(err) {
       if (err) {
-        alert("Gagal menghapus pengumuman.");
+        tampilkanToast("Gagal menghapus pengumuman.", "error");
         return;
       }
 
@@ -789,7 +943,7 @@ function hapusPengumuman() {
       document.getElementById("statusPengumuman").textContent =
         "Pengumuman berhasil dihapus.";
 
-      alert("Pengumuman berhasil dihapus!");
+      tampilkanToast("Pengumuman berhasil dihapus!");
     }
   );
 }
@@ -805,12 +959,12 @@ function aturKecepatanRunningText() {
     kecepatan < 5 ||
     kecepatan > 60
   ) {
-    alert("Masukkan angka antara 5 sampai 60 detik!");
+    tampilkanToast("Masukkan angka antara 5 sampai 60 detik!", "error");
     return;
   }
 
   if (!client || !client.connected) {
-    alert("MQTT belum terhubung!");
+    tampilkanToast("MQTT belum terhubung!", "error");
     return;
   }
 
@@ -820,14 +974,14 @@ function aturKecepatanRunningText() {
     { qos: 1, retain: true },
     function(err) {
       if (err) {
-        alert("Gagal mengatur kecepatan teks berjalan!");
+        tampilkanToast("Gagal mengatur kecepatan teks berjalan!", "error");
         return;
       }
 
       document.getElementById("statusKecepatan").textContent =
         "Kecepatan berhasil diatur: " + kecepatan + " detik.";
 
-      alert("Kecepatan teks berjalan berhasil diubah!");
+      tampilkanToast("Kecepatan teks berjalan berhasil diubah!");
     }
   );
 }
@@ -835,4 +989,3 @@ function aturKecepatanRunningText() {
 
 </body>
 </html>
-```
