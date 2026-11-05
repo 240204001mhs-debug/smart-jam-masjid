@@ -319,6 +319,73 @@ hr {
 <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
   
 <script>
+
+
+// =====================================
+// LUNARVIEW - PERHITUNGAN FASE BULAN
+// =====================================
+
+function hitungFaseBulan() {
+  if (typeof SunCalc === "undefined") {
+    console.error("Library SunCalc belum berhasil dimuat");
+    return null;
+  }
+
+  // Mengambil waktu aktual perangkat
+  const sekarang = new Date();
+
+  // Menghitung fase dan iluminasi Bulan
+  const dataBulan = SunCalc.getMoonIllumination(sekarang);
+
+  const daftarFase = [
+    "Bulan Baru",
+    "Sabit Muda",
+    "Perbani Awal",
+    "Cembung Muda",
+    "Purnama",
+    "Cembung Tua",
+    "Perbani Akhir",
+    "Sabit Tua"
+  ];
+
+  // Fase astronomis dalam rentang 0 sampai 1
+  const indeksFase = Math.round(dataBulan.phase * 8) % 8;
+
+  // Persentase permukaan Bulan yang terang
+  const iluminasi = dataBulan.fraction * 100;
+
+  // Perkiraan umur Bulan sejak konjungsi terakhir
+  const umurBulan = dataBulan.phase * 29.530588853;
+
+  return {
+    waktu: sekarang,
+    fase: daftarFase[indeksFase],
+    faseNilai: dataBulan.phase,
+    iluminasi: iluminasi,
+    umur: umurBulan,
+    waxing: dataBulan.waxing
+  };
+}
+
+// =====================================
+// TES HASIL PERHITUNGAN
+// =====================================
+
+function tesLunarView() {
+  const hasil = hitungFaseBulan();
+
+  if (!hasil) return;
+
+  console.log("===== LUNARVIEW =====");
+  console.log("Waktu:", hasil.waktu.toLocaleString("id-ID"));
+  console.log("Fase:", hasil.fase);
+  console.log("Iluminasi:", hasil.iluminasi.toFixed(2) + "%");
+  console.log("Umur Bulan:", hasil.umur.toFixed(2) + " hari");
+  console.log("Sedang membesar:", hasil.waxing);
+}
+
+
+  
 let client = null;
 let waktuDetik = null;
 let lastDataReceived = 0;
