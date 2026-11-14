@@ -213,6 +213,15 @@ hr {
   <div id="status" class="status">BELUM TERHUBUNG</div>
 </header>
 
+<div class="panel" style="text-align: center;">
+  <h3>🎙️ Asisten Suara Masjid</h3>
+  <button type="button" id="btnMic" onclick="mulaiDengar()" style="background: #0284c7; padding: 20px; border-radius: 50%; width: 80px; height: 80px; font-size: 30px; margin: 10px auto; display: block; color: white; border: none; cursor: pointer;">
+    🎤
+  </button>
+  <p id="statusSuara" style="font-weight: bold; color: #64748b;">Tekan mikrofon lalu bicara...</p>
+</div>
+  
+
 <div class="panel clock">
   <small>WAKTU SAAT INI (WITA)</small>
   <div id="clock">--:--:--</div>
@@ -987,5 +996,112 @@ function aturKecepatanRunningText() {
 }
 </script>
 
+  // =====================================
+// ASISTEN SUARA (WEB SPEECH API)
+// =====================================
+
+let recognition;
+let sedangMendengar = false;
+
+if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.lang = 'id-ID'; // Bahasa Indonesia
+    recognition.continuous = false;
+    recognition.interimResults = false;
+
+    recognition.onstart = function() {
+        sedangMendengar = true;
+        document.getElementById("btnMic").style.background = "#dc2626"; // Merah saat merekam
+        document.getElementById("statusSuara").textContent = "Mendengarkan...";
+        document.getElementById("statusSuara").style.color = "#dc2626";
+    };
+
+    recognition.onresult = function(event) {
+        const teks = event.results[0][0].transcript.toLowerCase();
+        document.getElementById("statusSuara").textContent = `Anda: "${teks}"`;
+        document.getElementById("statusSuara").style.color = "#16a34a";
+        
+        // Logika Perintah Suara (Lampu & Alarm)
+        if (teks.includes("nyalakan semua lampu") || teks.includes("lampu semua nyala")) {
+            kirimPerintah("SEMUA_LAMPU_ON");
+            tampilkanToast("Semua lampu dinyalakan!");
+        } 
+        else if (teks.includes("matikan semua lampu") || teks.includes("lampu semua mati")) {
+            kirimPerintah("SEMUA_LAMPU_OFF");
+            tampilkanToast("Semua lampu dimatikan!");
+        }
+        else if (teks.includes("nyalakan lampu teras")) {
+            kirimPerintah("TERAS_ON");
+            tampilkanToast("Lampu Teras dinyalakan!");
+        } 
+        else if (teks.includes("matikan lampu teras")) {
+            kirimPerintah("TERAS_OFF");
+            tampilkanToast("Lampu Teras dimatikan!");
+        }
+        else if (teks.includes("nyalakan lampu dalam") || teks.includes("nyalakan lampu masjid")) {
+            kirimPerintah("DALAM_ON");
+            tampilkanToast("Lampu Dalam Masjid dinyalakan!");
+        } 
+        else if (teks.includes("matikan lampu dalam") || teks.includes("matikan lampu masjid")) {
+            kirimPerintah("DALAM_OFF");
+            tampilkanToast("Lampu Dalam Masjid dimatikan!");
+        }
+        else if (teks.includes("nyalakan lampu luar")) {
+            kirimPerintah("LUAR_ON");
+            tampilkanToast("Lampu Luar dinyalakan!");
+        } 
+        else if (teks.includes("matikan lampu luar")) {
+            kirimPerintah("LUAR_OFF");
+            tampilkanToast("Lampu Luar dimatikan!");
+        }
+        else if (teks.includes("nyalakan alarm")) {
+            kirimPerintah("ALARM_ON");
+            tampilkanToast("Alarm diaktifkan!");
+        }
+        else if (teks.includes("matikan alarm")) {
+            kirimPerintah("ALARM_OFF");
+            tampilkanToast("Alarm dimatikan!");
+        }
+        else {
+            tampilkanToast("Perintah tidak dikenali.", "error");
+        }
+    };
+
+    recognition.onerror = function(event) {
+        console.error("Error pengenalan suara:", event.error);
+        document.getElementById("statusSuara").textContent = "Gagal mendengar. Coba lagi.";
+        document.getElementById("statusSuara").style.color = "#dc2626";
+        resetTombolMic();
+    };
+
+    recognition.onend = function() {
+        resetTombolMic();
+    };
+}
+
+function resetTombolMic() {
+    sedangMendengar = false;
+    document.getElementById("btnMic").style.background = "#0284c7"; // Biru normal
+}
+
+function mulaiDengar() {
+    if (!client || !client.connected) {
+        tampilkanToast("Hubungkan MQTT terlebih dahulu!", "error");
+        return;
+    }
+    
+    if (!recognition) {
+        tampilkanToast("Browser Anda tidak mendukung fitur suara.", "error");
+        return;
+    }
+
+    if (sedangMendengar) {
+        recognition.stop();
+    } else {
+        recognition.start();
+    }
+}
+  
 </body>
 </html>
