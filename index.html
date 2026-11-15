@@ -1,66 +1,272 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Panel Kendali Smart Jam Masjid</title>
+<title>SMART MOSQUE - Smart Jam Masjid</title>
+
 <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
 
 <style>
-* { box-sizing: border-box; }
-body {
-  margin: 0; padding: 20px;
-  font-family: Arial, sans-serif;
-  background: #031d1b; color: #172033;
+* {
+  box-sizing: border-box;
 }
-.container { max-width: 650px; margin: auto; }
+
+body {
+  margin: 0;
+  padding: 18px;
+  font-family: Arial, sans-serif;
+  background: #031d1b;
+  color: #172033;
+}
+
+.container {
+  max-width: 700px;
+  margin: auto;
+}
+
 header {
   background: linear-gradient(135deg,#064e3b,#047857);
-  color: white; padding: 22px; border-radius: 16px;
-  text-align: center; border: 1px solid #d4af37;
+  color: white;
+  padding: 22px;
+  border-radius: 16px;
+  text-align: center;
+  border: 1px solid #d4af37;
 }
-header h2 { color: #f5d77b; }
+
+header h2 {
+  color: #f5d77b;
+  margin-top: 0;
+}
+
 .panel {
-  background: white; padding: 20px;
-  margin-top: 16px; border-radius: 15px;
+  background: white;
+  padding: 20px;
+  margin-top: 16px;
+  border-radius: 15px;
+  box-shadow: 0 3px 12px #0002;
 }
-.panel h3 { color: #075e49; margin-top: 0; }
-.clock { text-align: center; }
-#clock { font-size: 42px; font-weight: bold; color: #075e49; }
-.status { font-weight: bold; color: #b45309; }
+
+.panel h3 {
+  color: #075e49;
+  margin-top: 0;
+}
+
+.clock {
+  text-align: center;
+}
+
+#clock {
+  font-size: 42px;
+  font-weight: bold;
+  color: #075e49;
+}
+
+#date {
+  margin-top: 5px;
+  color: #64748b;
+}
+
+.hijri-date {
+  margin-top: 10px;
+  padding: 12px;
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  color: #075e49;
+  font-weight: bold;
+  font-size: 17px;
+}
+
+.status {
+  font-weight: bold;
+  color: #b45309;
+}
+
 input, button, textarea {
-  width: 100%; padding: 12px; margin: 6px 0;
-  border: 1px solid #ccd3dc; border-radius: 8px;
+  width: 100%;
+  padding: 12px;
+  margin: 6px 0;
+  border: 1px solid #ccd3dc;
+  border-radius: 8px;
   font-family: Arial, sans-serif;
 }
+
 button {
-  background: #087a5b; color: white;
-  font-weight: bold; border: 0; cursor: pointer;
+  background: #087a5b;
+  color: white;
+  font-weight: bold;
+  border: 0;
+  cursor: pointer;
 }
+
+button:active {
+  opacity: .8;
+}
+
 .row {
-  display: flex; justify-content: space-between;
-  padding: 12px 0; border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  gap: 10px;
 }
-small { color: #64748b; }
+
+small {
+  color: #64748b;
+}
+
 label {
-  display: block; margin-top: 10px;
-  font-weight: bold; color: #334155;
+  display: block;
+  margin-top: 10px;
+  font-weight: bold;
+  color: #334155;
 }
-hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
+
+hr {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 20px 0;
+}
+
 pre {
-  white-space: pre-wrap; overflow-wrap: anywhere;
-  background: #f1f5f9; padding: 12px; border-radius: 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #f1f5f9;
+  padding: 12px;
+  border-radius: 8px;
 }
+
+/* LUNARVIEW */
+.lunar-panel {
+  background: linear-gradient(145deg,#ffffff,#f0fdf4);
+  border: 1px solid #d4af37;
+}
+
+.lunar-main {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 8px 0 18px;
+}
+
+.lunar-emoji {
+  width: 92px;
+  height: 92px;
+  flex: 0 0 92px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #052e2b;
+  color: #f5d77b;
+  font-size: 62px;
+  box-shadow: inset 0 0 18px #0008;
+}
+
+.lunar-phase {
+  color: #075e49;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+.lunar-direction {
+  color: #64748b;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.lunar-grid {
+  display: grid;
+  grid-template-columns: repeat(3,minmax(0,1fr));
+  gap: 8px;
+}
+
+.lunar-stat {
+  background: #ecfdf5;
+  border: 1px solid #d1fae5;
+  border-radius: 10px;
+  padding: 11px 8px;
+  min-width: 0;
+}
+
+.lunar-stat small {
+  display: block;
+  line-height: 1.35;
+  min-height: 30px;
+}
+
+.lunar-stat b {
+  display: block;
+  color: #075e49;
+  font-size: 16px;
+  overflow-wrap: anywhere;
+}
+
+.lunar-note {
+  display: block;
+  margin-top: 12px;
+  line-height: 1.5;
+}
+
+/* STATUS LAMPU */
+.lamp-status {
+  font-weight: bold;
+  color: #b45309;
+}
+
+.lamp-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.lamp-buttons button {
+  flex: 1;
+}
+
+@media (max-width: 450px) {
+  .lunar-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .lunar-emoji {
+    width: 76px;
+    height: 76px;
+    flex-basis: 76px;
+    font-size: 52px;
+  }
+
+  .lunar-phase {
+    font-size: 19px;
+  }
+}
+
 #toast {
-  position: fixed; bottom: 24px; left: 50%;
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
   transform: translateX(-50%) translateY(120px);
-  background: #087a5b; color: white;
-  padding: 14px 22px; border-radius: 10px;
-  font-weight: bold; transition: transform .3s;
-  z-index: 99999; max-width: 90%; text-align: center;
+  background: #087a5b;
+  color: white;
+  padding: 14px 22px;
+  border-radius: 10px;
+  font-weight: bold;
+  transition: transform .3s;
+  z-index: 99999;
+  max-width: 90%;
+  text-align: center;
 }
-#toast.show { transform: translateX(-50%) translateY(0); }
-#toast.error { background: #dc2626; }
+
+#toast.show {
+  transform: translateX(-50%) translateY(0);
+}
+
+#toast.error {
+  background: #dc2626;
+}
+
 </style>
 </head>
 
@@ -69,32 +275,91 @@ pre {
 
 <header>
   <h2>SMART JAM MASJID</h2>
-  <p>Panel Kendali Internet of Things</p>
+  <p>Smart Mosque - Internet of Things</p>
   <div id="status" class="status">BELUM TERHUBUNG</div>
 </header>
 
+<!-- JAM DAN KALENDER -->
 <div class="panel clock">
-  <small>WAKTU SAAT INI (WITA)</small>
+  <small>WAKTU SAAT INI - WITA</small>
   <div id="clock">--:--:--</div>
   <div id="date">Memuat tanggal...</div>
+
+  <div class="hijri-date">
+    🌙 <span id="tanggalHijriah">Memuat kalender Hijriah...</span>
+  </div>
 </div>
 
+<!-- LUNARVIEW -->
+<div class="panel lunar-panel">
+  <h3>🌙 LunarView - Fase Bulan Astronomis</h3>
+
+  <div class="lunar-main">
+    <div id="lunarEmoji" class="lunar-emoji">🌑</div>
+
+    <div>
+      <div id="lunarPhase" class="lunar-phase">
+        Menghitung fase Bulan...
+      </div>
+
+      <div id="lunarDirection" class="lunar-direction">
+        Menunggu data astronomis
+      </div>
+    </div>
+  </div>
+
+  <div class="lunar-grid">
+
+    <div class="lunar-stat">
+      <small>Iluminasi Bulan</small>
+      <b id="lunarIllumination">--%</b>
+    </div>
+
+    <div class="lunar-stat">
+      <small>Umur Bulan</small>
+      <b id="lunarAge">-- hari</b>
+    </div>
+
+    <div class="lunar-stat">
+      <small>Waktu Perhitungan</small>
+      <b id="lunarUpdated">--:--:--</b>
+    </div>
+
+  </div>
+
+  <small class="lunar-note">
+    Perhitungan fase Bulan menggunakan data astronomis
+    berdasarkan waktu aktual. Umur Bulan merupakan estimasi
+    dari siklus sinodis rata-rata. Informasi ini bukan
+    penetapan awal bulan Hijriah.
+  </small>
+</div>
+
+<!-- ASISTEN SUARA -->
 <div class="panel" style="text-align:center">
   <h3>🎙️ Asisten Suara Masjid</h3>
-  <button type="button" id="btnMic" onclick="mulaiDengar()"
+
+  <button
+    type="button"
+    id="btnMic"
+    onclick="mulaiDengar()"
     style="background:#0284c7;width:80px;height:80px;border-radius:50%;font-size:30px">
     🎤
   </button>
+
   <p id="statusSuara">Tekan mikrofon lalu bicara...</p>
 </div>
 
+<!-- JADWAL SALAT -->
 <div class="panel">
-  <h3>🕌 Jadwal Waktu Salat (Data ESP32)</h3>
+  <h3>🕌 Jadwal Waktu Salat</h3>
+
   <div class="row"><span>Subuh</span><b id="subuh">--:--</b></div>
   <div class="row"><span>Zuhur</span><b id="zuhur">--:--</b></div>
   <div class="row"><span>Asar</span><b id="ashar">--:--</b></div>
   <div class="row"><span>Magrib</span><b id="magrib">--:--</b></div>
   <div class="row"><span>Isya</span><b id="isya">--:--</b></div>
+
   <p>Status Alarm: <b id="alarm">Menunggu...</b></p>
 </div>
 
@@ -102,75 +367,159 @@ pre {
 <div class="panel">
   <h3>💡 Kendali Lampu Masjid</h3>
 
-  <label>Lampu Teras</label>
-  <div style="display:flex;gap:10px">
-    <button onclick="kirimPerintah('TERAS_ON')" style="background:#16a34a">TERAS ON</button>
-    <button onclick="kirimPerintah('TERAS_OFF')" style="background:#dc2626">TERAS OFF</button>
+  <div class="row">
+    <span>Lampu Teras</span>
+    <b id="statusTeras" class="lamp-status">MENUNGGU...</b>
   </div>
 
-  <label>Lampu Dalam</label>
-  <div style="display:flex;gap:10px">
-    <button onclick="kirimPerintah('DALAM_ON')" style="background:#16a34a">DALAM ON</button>
-    <button onclick="kirimPerintah('DALAM_OFF')" style="background:#dc2626">DALAM OFF</button>
+  <div class="lamp-buttons">
+    <button onclick="kirimPerintah('TERAS_ON')" style="background:#16a34a">
+      TERAS ON
+    </button>
+
+    <button onclick="kirimPerintah('TERAS_OFF')" style="background:#dc2626">
+      TERAS OFF
+    </button>
   </div>
 
-  <label>Lampu Luar</label>
-  <div style="display:flex;gap:10px">
-    <button onclick="kirimPerintah('LUAR_ON')" style="background:#16a34a">LUAR ON</button>
-    <button onclick="kirimPerintah('LUAR_OFF')" style="background:#dc2626">LUAR OFF</button>
+  <div class="row">
+    <span>Lampu Dalam</span>
+    <b id="statusDalam" class="lamp-status">MENUNGGU...</b>
+  </div>
+
+  <div class="lamp-buttons">
+    <button onclick="kirimPerintah('DALAM_ON')" style="background:#16a34a">
+      DALAM ON
+    </button>
+
+    <button onclick="kirimPerintah('DALAM_OFF')" style="background:#dc2626">
+      DALAM OFF
+    </button>
+  </div>
+
+  <div class="row">
+    <span>Lampu Luar</span>
+    <b id="statusLuar" class="lamp-status">MENUNGGU...</b>
+  </div>
+
+  <div class="lamp-buttons">
+    <button onclick="kirimPerintah('LUAR_ON')" style="background:#16a34a">
+      LUAR ON
+    </button>
+
+    <button onclick="kirimPerintah('LUAR_OFF')" style="background:#dc2626">
+      LUAR OFF
+    </button>
   </div>
 
   <hr>
-<h3>💡 Kendali Semua Lampu</h3>
 
-<div style="display:flex;gap:10px">
-  <button onclick="kirimPerintah('SEMUA_LAMPU_ON')"
-    style="background:#15803d">
-    NYALAKAN SEMUA
-  </button>
+  <h3>💡 Kendali Semua Lampu</h3>
 
-  <button onclick="kirimPerintah('SEMUA_LAMPU_OFF')"
-    style="background:#b91c1c">
-    MATIKAN SEMUA
-  </button>
+  <div class="lamp-buttons">
+    <button
+      onclick="kirimPerintah('SEMUA_LAMPU_ON')"
+      style="background:#15803d">
+      NYALAKAN SEMUA
+    </button>
+
+    <button
+      onclick="kirimPerintah('SEMUA_LAMPU_OFF')"
+      style="background:#b91c1c">
+      MATIKAN SEMUA
+    </button>
+  </div>
 </div>
 
-  <hr>
-  <h3>Alarm & Bel</h3>
-  <button onclick="kirimPerintah('ALARM_ON')">AKTIFKAN ALARM</button>
-  <button onclick="kirimPerintah('ALARM_OFF')" style="background:#dc2626">MATIKAN ALARM</button>
-  <button onclick="kirimPerintah('TEST_BUZZER')" style="background:#b45309">UJI BEL</button>
+<!-- ALARM DAN BEL -->
+<div class="panel">
+  <h3>🔔 Alarm dan Bel Masjid</h3>
+
+  <button onclick="kirimPerintah('ALARM_ON')">
+    AKTIFKAN ALARM
+  </button>
+
+  <button onclick="kirimPerintah('ALARM_OFF')" style="background:#dc2626">
+    MATIKAN ALARM
+  </button>
+
+  <button onclick="kirimPerintah('TEST_BUZZER')" style="background:#b45309">
+    UJI BEL
+  </button>
 
   <label>Durasi Bel (ms)</label>
-  <input type="number" id="durasiBuzzer" value="2000" min="100" max="10000">
+  <input
+    type="number"
+    id="durasiBuzzer"
+    value="2000"
+    min="100"
+    max="10000">
+
   <button onclick="kirimPerintah('DURASI:' + document.getElementById('durasiBuzzer').value)">
     SIMPAN DURASI BEL
   </button>
 </div>
 
+<!-- RUNNING TEXT -->
 <div class="panel">
   <h3>📢 Running Text TV</h3>
-  <textarea id="teksPengumuman" rows="3"
-    placeholder="Ketik pengumuman untuk ditampilkan di TV..."></textarea>
-  <button onclick="kirimPengumuman()">KIRIM PENGUMUMAN</button>
-  <button onclick="hapusPengumuman()" style="background:#dc2626">HAPUS PENGUMUMAN</button>
+
+  <textarea
+    id="teksPengumuman"
+    rows="3"
+    placeholder="Ketik pengumuman untuk ditampilkan di TV...">
+  </textarea>
+
+  <button onclick="kirimPengumuman()">
+    KIRIM PENGUMUMAN
+  </button>
+
+  <button onclick="hapusPengumuman()" style="background:#dc2626">
+    HAPUS PENGUMUMAN
+  </button>
 
   <hr>
+
   <h3>⚡ Kecepatan Teks Berjalan</h3>
+
   <label>Durasi Gerakan (detik)</label>
-  <input type="number" id="kecepatanRunningText" value="25" min="5" max="60">
-  <button onclick="aturKecepatanRunningText()">SIMPAN KECEPATAN</button>
+
+  <input
+    type="number"
+    id="kecepatanRunningText"
+    value="25"
+    min="5"
+    max="60">
+
+  <button onclick="aturKecepatanRunningText()">
+    SIMPAN KECEPATAN
+  </button>
 </div>
 
+<!-- KONEKSI MQTT -->
 <div class="panel">
-  <h3>🔗 Koneksi Server MQTT</h3>
+  <h3>🔗 Koneksi Server MQTT EMQX</h3>
+
   <label>Username</label>
-  <input type="text" id="username" placeholder="Username MQTT">
+  <input
+    type="text"
+    id="username"
+    placeholder="Username MQTT"
+    autocomplete="username">
+
   <label>Password</label>
-  <input type="password" id="password" placeholder="Password MQTT">
-  <button onclick="connectMQTT()">HUBUNGKAN PERANGKAT</button>
+  <input
+    type="password"
+    id="password"
+    placeholder="Password MQTT"
+    autocomplete="current-password">
+
+  <button onclick="connectMQTT()">
+    HUBUNGKAN PERANGKAT
+  </button>
 </div>
 
+<!-- DATA MQTT -->
 <div class="panel">
   <h3>📡 Data MQTT Terakhir</h3>
   <pre id="raw">Belum ada data dari ESP32.</pre>
@@ -181,91 +530,313 @@ pre {
 <div id="toast"></div>
 
 <script>
+
+// =====================================
+// TOAST
+// =====================================
+
 let toastTimer = null;
 
 function tampilkanToast(pesan, tipe) {
   const toast = document.getElementById("toast");
+
   toast.textContent = pesan;
   toast.className = tipe === "error" ? "show error" : "show";
+
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.className = "", 3000);
+
+  toastTimer = setTimeout(function() {
+    toast.className = "";
+  }, 3000);
 }
 
-// JAM
+// =====================================
+// JAM WITA
+// =====================================
+
 function jalankanJam() {
-  const skrg = new Date();
+  const sekarang = new Date();
+
   document.getElementById("clock").textContent =
-    String(skrg.getHours()).padStart(2,"0") + ":" +
-    String(skrg.getMinutes()).padStart(2,"0") + ":" +
-    String(skrg.getSeconds()).padStart(2,"0");
+    sekarang.toLocaleTimeString("id-ID", {
+      timeZone: "Asia/Makassar",
+      hour12: false
+    });
 
   document.getElementById("date").textContent =
-    skrg.toLocaleDateString("id-ID", {
-      weekday:"long", day:"numeric", month:"long", year:"numeric"
+    sekarang.toLocaleDateString("id-ID", {
+      timeZone: "Asia/Makassar",
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
     });
 }
+
 jalankanJam();
 setInterval(jalankanJam, 1000);
 
+// =====================================
+// TANGGAL HIJRIAH
+// =====================================
+
+function tampilkanTanggalHijriah() {
+  const sekarang = new Date();
+
+  try {
+    const hijriah = new Intl.DateTimeFormat(
+      "id-ID-u-ca-islamic-umalqura",
+      {
+        timeZone: "Asia/Makassar",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+      }
+    ).format(sekarang);
+
+    document.getElementById("tanggalHijriah").textContent =
+      hijriah + " H";
+
+  } catch(error) {
+    document.getElementById("tanggalHijriah").textContent =
+      "Kalender Hijriah tidak tersedia";
+
+    console.error(error);
+  }
+}
+
+tampilkanTanggalHijriah();
+setInterval(tampilkanTanggalHijriah, 3600000);
+
+// =====================================
+// LUNARVIEW - FASE BULAN ASTRONOMIS
+// =====================================
+
+function hitungFaseBulan(waktu = new Date()) {
+  if (typeof SunCalc === "undefined") {
+    console.error("Library SunCalc belum tersedia.");
+    return null;
+  }
+
+  const dataBulan = SunCalc.getMoonIllumination(waktu);
+
+  const daftarFase = [
+    { nama: "Bulan Baru", emoji: "🌑" },
+    { nama: "Sabit Muda", emoji: "🌒" },
+    { nama: "Perbani Awal", emoji: "🌓" },
+    { nama: "Cembung Muda", emoji: "🌔" },
+    { nama: "Purnama", emoji: "🌕" },
+    { nama: "Cembung Tua", emoji: "🌖" },
+    { nama: "Perbani Akhir", emoji: "🌗" },
+    { nama: "Sabit Tua", emoji: "🌘" }
+  ];
+
+  const indeks = Math.round(dataBulan.phase * 8) % 8;
+
+  return {
+    fase: daftarFase[indeks].nama,
+    emoji: daftarFase[indeks].emoji,
+    iluminasi: dataBulan.fraction * 100,
+    umur: dataBulan.phase * 29.530588853,
+    waxing: dataBulan.waxing,
+    waktu: waktu
+  };
+}
+
+function perbaruiLunarView() {
+  const hasil = hitungFaseBulan();
+
+  if (!hasil) {
+    document.getElementById("lunarPhase").textContent =
+      "Data fase Bulan tidak tersedia";
+    return;
+  }
+
+  document.getElementById("lunarEmoji").textContent =
+    hasil.emoji;
+
+  document.getElementById("lunarPhase").textContent =
+    hasil.fase;
+
+  document.getElementById("lunarDirection").textContent =
+    hasil.waxing
+      ? "Menuju purnama · cahaya bertambah"
+      : "Menuju bulan baru · cahaya berkurang";
+
+  document.getElementById("lunarIllumination").textContent =
+    hasil.iluminasi.toFixed(1) + "%";
+
+  document.getElementById("lunarAge").textContent =
+    hasil.umur.toFixed(1) + " hari";
+
+  document.getElementById("lunarUpdated").textContent =
+    hasil.waktu.toLocaleTimeString("id-ID", {
+      timeZone: "Asia/Makassar",
+      hour12: false
+    });
+}
+
+// Perbarui setiap menit
+perbaruiLunarView();
+setInterval(perbaruiLunarView, 60000);
+
+// =====================================
 // MQTT
+// =====================================
+
 let client = null;
+
+const MQTT_URL =
+  "wss://i165de43.ala.asia-southeast1.emqxsl.com:8084/mqtt";
+
+const TOPIC_DATA = "smartjam/masjid/data";
+
+const TOPIC_DALAM_STATUS =
+  "smartjam/masjid/lampu/dalam/status";
+
+const TOPIC_TERAS_STATUS =
+  "smartjam/masjid/lampu/teras/status";
+
+const TOPIC_LUAR_STATUS =
+  "smartjam/masjid/lampu/luar/status";
 
 function ubahStatus(teks, warna) {
   const status = document.getElementById("status");
+
   status.textContent = teks;
   status.style.color = warna;
 }
 
+// =====================================
+// STATUS LAMPU
+// =====================================
+
+function tampilkanStatusLampu(id, pesan) {
+  const elemen = document.getElementById(id);
+
+  const status = pesan.toString().trim().toUpperCase();
+
+  if (status === "ON") {
+    elemen.textContent = "MENYALA";
+    elemen.style.color = "#16a34a";
+  }
+
+  else if (status === "OFF") {
+    elemen.textContent = "MATI";
+    elemen.style.color = "#dc2626";
+  }
+}
+
+// =====================================
+// KONEKSI MQTT
+// =====================================
+
 function connectMQTT() {
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value;
+  const username =
+    document.getElementById("username").value.trim();
+
+  const password =
+    document.getElementById("password").value;
 
   if (!username || !password) {
     tampilkanToast("Isi username dan password MQTT!", "error");
     return;
   }
 
-  if (client) client.end(true);
+  if (typeof mqtt === "undefined") {
+    tampilkanToast("Library MQTT tidak tersedia!", "error");
+    return;
+  }
+
+  if (client) {
+    client.end(true);
+  }
+
   ubahStatus("MENGHUBUNGKAN...", "#b45309");
 
-  client = mqtt.connect(
-    "wss://i165de43.ala.asia-southeast1.emqxsl.com:8084/mqtt",
-    {
-      username: username,
-      password: password,
-      clientId: "dashboard_" + Math.random().toString(16).slice(2),
-      clean: true,
-      connectTimeout: 10000,
-      reconnectPeriod: 3000
-    }
-  );
-
-  client.on("connect", function() {
-    ubahStatus("TERHUBUNG", "#16a34a");
-    tampilkanToast("MQTT berhasil terhubung.");
-    client.subscribe("smartjam/masjid/data", {qos:1});
+  client = mqtt.connect(MQTT_URL, {
+    username: username,
+    password: password,
+    clientId: "dashboard_" + Math.random().toString(16).slice(2),
+    clean: true,
+    connectTimeout: 10000,
+    reconnectPeriod: 3000
   });
 
+  // MQTT TERHUBUNG
+  client.on("connect", function() {
+    ubahStatus("TERHUBUNG", "#16a34a");
+
+    tampilkanToast("MQTT berhasil terhubung.");
+
+    // Berlangganan data jadwal dan status lampu
+    client.subscribe(TOPIC_DATA, {qos:1});
+
+    client.subscribe(TOPIC_DALAM_STATUS, {qos:1});
+    client.subscribe(TOPIC_TERAS_STATUS, {qos:1});
+    client.subscribe(TOPIC_LUAR_STATUS, {qos:1});
+  });
+
+  // MENERIMA PESAN MQTT
   client.on("message", function(topic, message) {
-    if (topic !== "smartjam/masjid/data") return;
+
+    // STATUS LAMPU DALAM
+    if (topic === TOPIC_DALAM_STATUS) {
+      tampilkanStatusLampu("statusDalam", message);
+      return;
+    }
+
+    // STATUS LAMPU TERAS
+    if (topic === TOPIC_TERAS_STATUS) {
+      tampilkanStatusLampu("statusTeras", message);
+      return;
+    }
+
+    // STATUS LAMPU LUAR
+    if (topic === TOPIC_LUAR_STATUS) {
+      tampilkanStatusLampu("statusLuar", message);
+      return;
+    }
+
+    // DATA JADWAL SALAT
+    if (topic !== TOPIC_DATA) return;
 
     try {
       const data = JSON.parse(message.toString());
-      document.getElementById("subuh").textContent = data.subuh || "--:--";
-      document.getElementById("zuhur").textContent = data.zuhur || "--:--";
-      document.getElementById("ashar").textContent = data.ashar || "--:--";
-      document.getElementById("magrib").textContent = data.magrib || "--:--";
-      document.getElementById("isya").textContent = data.isya || "--:--";
+
+      document.getElementById("subuh").textContent =
+        data.subuh || "--:--";
+
+      document.getElementById("zuhur").textContent =
+        data.zuhur || "--:--";
+
+      document.getElementById("ashar").textContent =
+        data.ashar || "--:--";
+
+      document.getElementById("magrib").textContent =
+        data.magrib || "--:--";
+
+      document.getElementById("isya").textContent =
+        data.isya || "--:--";
+
+      const alarmAktif =
+        data.alarm === true ||
+        data.alarm === 1 ||
+        data.alarm === "true";
+
       document.getElementById("alarm").textContent =
-        data.alarm ? "AKTIF" : "NONAKTIF";
+        alarmAktif ? "AKTIF" : "NONAKTIF";
+
       document.getElementById("raw").textContent =
         JSON.stringify(data, null, 2);
-    } catch(e) {
-      console.log("Data MQTT bukan JSON:", e);
+
+    } catch(error) {
+      console.error("Data MQTT bukan JSON:", error);
     }
   });
 
-  client.on("error", function() {
+  client.on("error", function(error) {
+    console.error("MQTT error:", error);
     ubahStatus("KESALAHAN KONEKSI", "#dc2626");
   });
 
@@ -278,8 +849,10 @@ function connectMQTT() {
   });
 }
 
-
+// =====================================
 // KIRIM PERINTAH
+// =====================================
+
 function kirimPerintah(perintah) {
   if (!client || !client.connected) {
     tampilkanToast("MQTT belum terhubung!", "error");
@@ -287,15 +860,17 @@ function kirimPerintah(perintah) {
   }
 
   const topicLampu = {
-    "DALAM_ON":  "smartjam/masjid/lampu/dalam/set",
+    "DALAM_ON": "smartjam/masjid/lampu/dalam/set",
     "DALAM_OFF": "smartjam/masjid/lampu/dalam/set",
-    "TERAS_ON":  "smartjam/masjid/lampu/teras/set",
+
+    "TERAS_ON": "smartjam/masjid/lampu/teras/set",
     "TERAS_OFF": "smartjam/masjid/lampu/teras/set",
-    "LUAR_ON":   "smartjam/masjid/lampu/luar/set",
-    "LUAR_OFF":  "smartjam/masjid/lampu/luar/set"
+
+    "LUAR_ON": "smartjam/masjid/lampu/luar/set",
+    "LUAR_OFF": "smartjam/masjid/lampu/luar/set"
   };
 
-  // PERINTAH NYALAKAN ATAU MATIKAN SEMUA LAMPU
+  // NYALAKAN ATAU MATIKAN SEMUA LAMPU
   if (
     perintah === "SEMUA_LAMPU_ON" ||
     perintah === "SEMUA_LAMPU_OFF"
@@ -313,7 +888,7 @@ function kirimPerintah(perintah) {
     let gagal = false;
 
     daftarTopic.forEach(function(topic) {
-      client.publish(topic, isiPesan, { qos: 1 }, function(err) {
+      client.publish(topic, isiPesan, {qos:1}, function(err) {
         if (err) {
           gagal = true;
           console.error("Gagal:", topic, err);
@@ -323,12 +898,15 @@ function kirimPerintah(perintah) {
 
         if (selesai === daftarTopic.length) {
           if (gagal) {
-            tampilkanToast("Gagal mengirim sebagian perintah!", "error");
+            tampilkanToast(
+              "Sebagian perintah lampu gagal dikirim!",
+              "error"
+            );
           } else {
             tampilkanToast(
               perintah === "SEMUA_LAMPU_ON"
-                ? "Perintah NYALAKAN SEMUA terkirim!"
-                : "Perintah MATIKAN SEMUA terkirim!"
+                ? "Semua lampu diperintahkan menyala!"
+                : "Semua lampu diperintahkan mati!"
             );
           }
         }
@@ -338,16 +916,17 @@ function kirimPerintah(perintah) {
     return;
   }
 
-  // PERINTAH LAMPU SATU PER SATU
+  // LAMPU SATU PER SATU
   let topicTujuan = "smartjam/masjid/control";
   let isiPesan = perintah;
 
   if (topicLampu[perintah]) {
     topicTujuan = topicLampu[perintah];
+
     isiPesan = perintah.endsWith("_ON") ? "ON" : "OFF";
   }
 
-  client.publish(topicTujuan, isiPesan, { qos: 1 }, function(err) {
+  client.publish(topicTujuan, isiPesan, {qos:1}, function(err) {
     if (err) {
       tampilkanToast("Gagal mengirim perintah!", "error");
       console.error(err);
@@ -358,103 +937,176 @@ function kirimPerintah(perintah) {
   });
 }
 
+// =====================================
 // RUNNING TEXT
+// =====================================
+
 function kirimPengumuman() {
-  const teks = document.getElementById("teksPengumuman").value.trim();
+  const teks =
+    document.getElementById("teksPengumuman").value.trim();
+
   if (!teks) {
-    tampilkanToast("Teks kosong!", "error");
+    tampilkanToast("Teks pengumuman kosong!", "error");
     return;
   }
+
   if (!client || !client.connected) {
     tampilkanToast("MQTT belum terhubung!", "error");
     return;
   }
 
-  client.publish("smartjam/masjid/runningtext", teks,
-    {qos:1, retain:true}, function(err) {
-      if (!err) tampilkanToast("Pengumuman terkirim ke TV!");
-    });
+  client.publish(
+    "smartjam/masjid/runningtext",
+    teks,
+    {qos:1, retain:true},
+    function(err) {
+      if (err) {
+        tampilkanToast("Gagal mengirim pengumuman!", "error");
+      } else {
+        tampilkanToast("Pengumuman terkirim ke TV!");
+      }
+    }
+  );
 }
 
 function hapusPengumuman() {
-  if (!client || !client.connected) return;
+  if (!client || !client.connected) {
+    tampilkanToast("MQTT belum terhubung!", "error");
+    return;
+  }
 
-  client.publish("smartjam/masjid/runningtext", " ",
-    {qos:1, retain:true}, function(err) {
+  client.publish(
+    "smartjam/masjid/runningtext",
+    " ",
+    {qos:1, retain:true},
+    function(err) {
       if (!err) {
         document.getElementById("teksPengumuman").value = "";
         tampilkanToast("Pengumuman dihapus.");
       }
-    });
+    }
+  );
 }
 
 function aturKecepatanRunningText() {
   const kecepatan =
     Number(document.getElementById("kecepatanRunningText").value);
 
-  if (!Number.isInteger(kecepatan) || kecepatan < 5 || kecepatan > 60) {
+  if (
+    !Number.isInteger(kecepatan) ||
+    kecepatan < 5 ||
+    kecepatan > 60
+  ) {
     tampilkanToast("Masukkan angka 5 sampai 60!", "error");
     return;
   }
 
-  if (!client || !client.connected) return;
+  if (!client || !client.connected) {
+    tampilkanToast("MQTT belum terhubung!", "error");
+    return;
+  }
 
-  client.publish("smartjam/masjid/kecepatan", String(kecepatan),
-    {qos:1, retain:true}, function(err) {
-      if (!err) tampilkanToast("Kecepatan diatur: " + kecepatan + " detik.");
-    });
+  client.publish(
+    "smartjam/masjid/kecepatan",
+    String(kecepatan),
+    {qos:1, retain:true},
+    function(err) {
+      if (!err) {
+        tampilkanToast(
+          "Kecepatan diatur: " + kecepatan + " detik."
+        );
+      }
+    }
+  );
 }
 
+// =====================================
 // ASISTEN SUARA
-let recognition;
+// =====================================
+
+let recognition = null;
 let sedangMendengar = false;
 
-if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+if (
+  "webkitSpeechRecognition" in window ||
+  "SpeechRecognition" in window
+) {
   const SpeechRecognition =
-    window.SpeechRecognition || window.webkitSpeechRecognition;
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
 
   recognition = new SpeechRecognition();
+
   recognition.lang = "id-ID";
   recognition.continuous = false;
   recognition.interimResults = false;
 
   recognition.onstart = function() {
     sedangMendengar = true;
-    document.getElementById("btnMic").style.background = "#dc2626";
-    document.getElementById("statusSuara").textContent = "Mendengarkan...";
+
+    document.getElementById("btnMic").style.background =
+      "#dc2626";
+
+    document.getElementById("statusSuara").textContent =
+      "Mendengarkan...";
   };
 
   recognition.onresult = function(event) {
-    const teks = event.results[0][0].transcript.toLowerCase();
-    document.getElementById("statusSuara").textContent = "Anda: " + teks;
+    const teks =
+      event.results[0][0].transcript.toLowerCase();
 
-    if (teks.includes("nyalakan lampu teras"))
+    document.getElementById("statusSuara").textContent =
+      "Anda: " + teks;
+
+    if (teks.includes("nyalakan semua lampu")) {
+      kirimPerintah("SEMUA_LAMPU_ON");
+    }
+
+    else if (teks.includes("matikan semua lampu")) {
+      kirimPerintah("SEMUA_LAMPU_OFF");
+    }
+
+    else if (teks.includes("nyalakan lampu teras")) {
       kirimPerintah("TERAS_ON");
-    else if (teks.includes("matikan lampu teras"))
+    }
+
+    else if (teks.includes("matikan lampu teras")) {
       kirimPerintah("TERAS_OFF");
-    else if (teks.includes("nyalakan lampu dalam"))
+    }
+
+    else if (teks.includes("nyalakan lampu dalam")) {
       kirimPerintah("DALAM_ON");
-    else if (teks.includes("matikan lampu dalam"))
+    }
+
+    else if (teks.includes("matikan lampu dalam")) {
       kirimPerintah("DALAM_OFF");
-    else if (teks.includes("nyalakan lampu luar"))
+    }
+
+    else if (teks.includes("nyalakan lampu luar")) {
       kirimPerintah("LUAR_ON");
-    else if (teks.includes("matikan lampu luar"))
+    }
+
+    else if (teks.includes("matikan lampu luar")) {
       kirimPerintah("LUAR_OFF");
-    else if (teks.includes("nyalakan alarm"))
+    }
+
+    else if (teks.includes("nyalakan alarm")) {
       kirimPerintah("ALARM_ON");
-    else if (teks.includes("matikan alarm"))
+    }
+
+    else if (teks.includes("matikan alarm")) {
       kirimPerintah("ALARM_OFF");
-    else if (teks.includes("nyalakan semua lampu"))
-      tampilkanToast("Perintah semua lampu belum dikonfigurasi.", "error");
-    else if (teks.includes("matikan semua lampu"))
-      tampilkanToast("Perintah semua lampu belum dikonfigurasi.", "error");
-    else
+    }
+
+    else {
       tampilkanToast("Perintah tidak dikenali.", "error");
+    }
   };
 
   recognition.onerror = function() {
     document.getElementById("statusSuara").textContent =
       "Gagal mendengar. Coba lagi.";
+
     resetTombolMic();
   };
 
@@ -465,7 +1117,9 @@ if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
 
 function resetTombolMic() {
   sedangMendengar = false;
-  document.getElementById("btnMic").style.background = "#0284c7";
+
+  document.getElementById("btnMic").style.background =
+    "#0284c7";
 }
 
 function mulaiDengar() {
@@ -473,13 +1127,22 @@ function mulaiDengar() {
     tampilkanToast("Hubungkan MQTT terlebih dahulu!", "error");
     return;
   }
+
   if (!recognition) {
-    tampilkanToast("Browser tidak mendukung fitur suara.", "error");
+    tampilkanToast(
+      "Browser tidak mendukung fitur suara.",
+      "error"
+    );
     return;
   }
-  if (sedangMendengar) recognition.stop();
-  else recognition.start();
+
+  if (sedangMendengar) {
+    recognition.stop();
+  } else {
+    recognition.start();
+  }
 }
+
 </script>
 </body>
 </html>
