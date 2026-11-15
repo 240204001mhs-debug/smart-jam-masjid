@@ -361,8 +361,24 @@ pre {
   <div class="row"><span>Isya</span><b id="isya">--:--</b></div>
 
   <p>Status Alarm: <b id="alarm">Menunggu...</b></p>
+  
+  <hr>
+  
+  <h3>⚙️ Pengaturan Mode Jadwal</h3>
+  <button onclick="kirimPerintah('MODE_AUTO')" style="background:#16a34a">AKTIFKAN MODE OTOMATIS</button>
+  
+  <label>Atau Input Jadwal Manual (HH:MM)</label>
+  <div style="display:flex; gap:10px;">
+    <input type="time" id="manualSubuh" value="04:30" style="flex:1">
+    <input type="time" id="manualZuhur" value="12:05" style="flex:1">
+    <input type="time" id="manualAshar" value="15:20" style="flex:1">
+    <input type="time" id="manualMagrib" value="18:15" style="flex:1">
+    <input type="time" id="manualIsya" value="19:30" style="flex:1">
+  </div>
+  
+  <button onclick="kirimJadwalManual()" style="background:#0284c7">SIMPAN JADWAL MANUAL</button>
 </div>
-
+  
 <!-- KENDALI LAMPU -->
 <div class="panel">
   <h3>💡 Kendali Lampu Masjid</h3>
@@ -912,10 +928,40 @@ function kirimPerintah(perintah) {
         }
       });
     });
-
+    
     return;
   }
 
+// ===== KIRIM JADWAL MANUAL =====
+function kirimJadwalManual() {
+  if (!client || !client.connected) {
+    tampilkanToast("MQTT belum terhubung!", "error");
+    return;
+  }
+
+  const subuh = document.getElementById("manualSubuh").value;
+  const zuhur = document.getElementById("manualZuhur").value;
+  const ashar = document.getElementById("manualAshar").value;
+  const magrib = document.getElementById("manualMagrib").value;
+  const isya = document.getElementById("manualIsya").value;
+
+  if (!subuh || !zuhur || !ashar || !magrib || !isya) {
+    tampilkanToast("Semua jadwal harus diisi!", "error");
+    return;
+  }
+
+  const perintah = "JADWAL:" + [subuh, zuhur, ashar, magrib, isya].join(",");
+  
+  client.publish("smartjam/masjid/control", perintah, { qos: 1 }, function(err) {
+    if (err) {
+      tampilkanToast("Gagal mengirim jadwal!", "error");
+    } else {
+      tampilkanToast("Jadwal manual berhasil dikirim.");
+    }
+  });
+}
+  
+  
   // LAMPU SATU PER SATU
   let topicTujuan = "smartjam/masjid/control";
   let isiPesan = perintah;
