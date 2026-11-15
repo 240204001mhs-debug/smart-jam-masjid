@@ -26,6 +26,7 @@ button:hover { opacity: 0.9; }
 small { color: #64748b; }
 label { display: block; margin-top: 10px; font-weight: bold; color: #334155; }
 hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
+pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 13px; }
 #toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(120px); background: #087a5b; color: white; padding: 14px 22px; border-radius: 10px; font-weight: bold; box-shadow: 0 4px 18px #0004; transition: transform 0.3s ease; z-index: 99999; max-width: 90%; text-align: center; }
 #toast.show { transform: translateX(-50%) translateY(0); }
 #toast.error { background: #dc2626; }
@@ -41,13 +42,14 @@ hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
   <div id="status" class="status">BELUM TERHUBUNG</div>
 </header>
 
+<!-- JAM -->
 <div class="panel clock">
   <small>WAKTU SAAT INI (WITA)</small>
   <div id="clock">--:--:--</div>
   <div id="date">Memuat tanggal...</div>
 </div>
 
-<!-- TOMBOL MIKROFON -->
+<!-- ASISTEN SUARA -->
 <div class="panel" style="text-align: center;">
   <h3>🎙️ Asisten Suara Masjid</h3>
   <button type="button" id="btnMic" onclick="mulaiDengar()" style="background: #0284c7; padding: 20px; border-radius: 50%; width: 80px; height: 80px; font-size: 30px; margin: 10px auto; display: block; color: white; border: none; cursor: pointer;">
@@ -56,18 +58,63 @@ hr { border: 0; border-top: 1px solid #e2e8f0; margin: 20px 0; }
   <p id="statusSuara" style="font-weight: bold; color: #64748b;">Tekan mikrofon lalu bicara...</p>
 </div>
 
+<!-- JADWAL SALAT -->
 <div class="panel">
-  <h3>🔗 Koneksi Perangkat</h3>
-  <label>Nama Pengguna MQTT</label>
-  <input type="text" id="username" placeholder="Masukkan nama pengguna MQTT" autocomplete="username">
-  <label>Kata Sandi MQTT</label>
-  <input type="password" id="password" placeholder="Masukkan kata sandi MQTT" autocomplete="current-password">
+  <h3>🕌 Jadwal Waktu Salat (Data ESP32)</h3>
+  <div class="row"><span>Subuh</span><b id="subuh">--:--</b></div>
+  <div class="row"><span>Zuhur</span><b id="zuhur">--:--</b></div>
+  <div class="row"><span>Asar</span><b id="ashar">--:--</b></div>
+  <div class="row"><span>Magrib</span><b id="magrib">--:--</b></div>
+  <div class="row"><span>Isya</span><b id="isya">--:--</b></div>
+  <p>Status Alarm: <b id="alarm" style="color:#b45309">Menunggu...</b></p>
+</div>
+
+<!-- KENDALI MANUAL -->
+<div class="panel">
+  <h3>🎛️ Kendali Perangkat (Manual)</h3>
+  <label>Lampu Masjid</label>
+  <div style="display:flex; gap:10px;">
+    <button onclick="kirimPerintah('TERAS_ON')" style="background:#16a34a">Teras ON</button>
+    <button onclick="kirimPerintah('TERAS_OFF')" style="background:#dc2626">Teras OFF</button>
+  </div>
+  <div style="display:flex; gap:10px; margin-top:5px;">
+    <button onclick="kirimPerintah('DALAM_ON')" style="background:#16a34a">Dalam ON</button>
+    <button onclick="kirimPerintah('DALAM_OFF')" style="background:#dc2626">Dalam OFF</button>
+  </div>
+  <div style="display:flex; gap:10px; margin-top:5px;">
+    <button onclick="kirimPerintah('LUAR_ON')" style="background:#16a34a">Luar ON</button>
+    <button onclick="kirimPerintah('LUAR_OFF')" style="background:#dc2626">Luar OFF</button>
+  </div>
+  
+  <hr>
+  <h3>Alarm & Bel</h3>
+  <button onclick="kirimPerintah('ALARM_ON')">AKTIFKAN ALARM</button>
+  <button onclick="kirimPerintah('ALARM_OFF')" style="background:#dc2626">MATIKAN ALARM</button>
+  <button onclick="kirimPerintah('TEST_BUZZER')" style="background:#b45309">UJI BEL</button>
+</div>
+
+<!-- PENGUMUMAN -->
+<div class="panel">
+  <h3>📢 Running Text TV</h3>
+  <textarea id="teksPengumuman" rows="3" placeholder="Ketik pengumuman untuk ditampilkan di TV..."></textarea>
+  <button onclick="kirimPengumuman()">KIRIM PENGUMUMAN</button>
+  <button onclick="hapusPengumuman()" style="background:#dc2626">HAPUS PENGUMUMAN</button>
+</div>
+
+<!-- KONEKSI MQTT -->
+<div class="panel">
+  <h3>🔗 Koneksi Server MQTT</h3>
+  <label>Username</label>
+  <input type="text" id="username" placeholder="Username MQTT" autocomplete="username">
+  <label>Password</label>
+  <input type="password" id="password" placeholder="Password MQTT" autocomplete="current-password">
   <button type="button" onclick="connectMQTT()">HUBUNGKAN PERANGKAT</button>
 </div>
 
+<!-- RAW DATA -->
 <div class="panel">
   <h3>📡 Data MQTT Terakhir</h3>
-  <pre id="raw" style="white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f5f9; padding: 12px; border-radius: 8px; font-size: 12px;">Belum ada data yang diterima.</pre>
+  <pre id="raw">Belum ada data dari ESP32.</pre>
 </div>
 
 </div>
@@ -85,13 +132,13 @@ function tampilkanToast(pesan, tipe) {
   toastTimer = setTimeout(function() { toast.className = ""; }, 3000);
 }
 
-// ===== JAM DIGITAL =====
+// ===== JAM =====
 function jalankanJam() {
   const skrg = new Date();
-  const jam = String(skrg.getHours()).padStart(2, "0");
-  const menit = String(skrg.getMinutes()).padStart(2, "0");
-  const detik = String(skrg.getSeconds()).padStart(2, "0");
-  document.getElementById("clock").textContent = `${jam}:${menit}:${detik}`;
+  document.getElementById("clock").textContent = 
+    String(skrg.getHours()).padStart(2, "0") + ":" +
+    String(skrg.getMinutes()).padStart(2, "0") + ":" +
+    String(skrg.getSeconds()).padStart(2, "0");
   document.getElementById("date").textContent = skrg.toLocaleDateString("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 }
 jalankanJam();
@@ -116,7 +163,6 @@ function connectMQTT() {
   }
 
   if (client) client.end(true);
-
   ubahStatus("MENGHUBUNGKAN...", "#b45309");
 
   client = mqtt.connect("wss://i165de43.ala.asia-southeast1.emqxsl.com:8084/mqtt", {
@@ -133,6 +179,14 @@ function connectMQTT() {
     if (topic !== "smartjam/masjid/data") return;
     try {
       const data = JSON.parse(message.toString());
+      
+      document.getElementById("subuh").textContent = data.subuh || "--:--";
+      document.getElementById("zuhur").textContent = data.zuhur || "--:--";
+      document.getElementById("ashar").textContent = data.ashar || "--:--";
+      document.getElementById("magrib").textContent = data.magrib || "--:--";
+      document.getElementById("isya").textContent = data.isya || "--:--";
+      document.getElementById("alarm").textContent = data.alarm ? "AKTIF" : "NONAKTIF";
+      
       document.getElementById("raw").textContent = JSON.stringify(data, null, 2);
     } catch (e) {}
   });
@@ -151,6 +205,27 @@ function kirimPerintah(perintah) {
   client.publish("smartjam/masjid/control", perintah, { qos: 1 }, function(err) {
     if (err) tampilkanToast("Gagal mengirim perintah!", "error");
     else console.log("Perintah terkirim:", perintah);
+  });
+}
+
+// ===== PENGUMUMAN =====
+function kirimPengumuman() {
+  const teks = document.getElementById("teksPengumuman").value.trim();
+  if (!teks) { tampilkanToast("Teks kosong!", "error"); return; }
+  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
+  
+  client.publish("smartjam/masjid/runningtext", teks, { qos: 1, retain: true }, function(err) {
+    if (!err) tampilkanToast("Pengumuman terkirim ke TV!");
+  });
+}
+
+function hapusPengumuman() {
+  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
+  client.publish("smartjam/masjid/runningtext", " ", { qos: 1, retain: true }, function(err) {
+    if (!err) {
+      document.getElementById("teksPengumuman").value = "";
+      tampilkanToast("Pengumuman dihapus.");
+    }
   });
 }
 
@@ -178,36 +253,34 @@ if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         document.getElementById("statusSuara").style.color = "#16a34a";
         
         if (teks.includes("nyalakan semua lampu")) {
-            kirimPerintah("SEMUA_LAMPU_ON");
-            tampilkanToast("Semua lampu dinyalakan!");
+            kirimPerintah("SEMUA_LAMPU_ON"); tampilkanToast("Semua lampu dinyalakan!");
         } 
         else if (teks.includes("matikan semua lampu")) {
-            kirimPerintah("SEMUA_LAMPU_OFF");
-            tampilkanToast("Semua lampu dimatikan!");
+            kirimPerintah("SEMUA_LAMPU_OFF"); tampilkanToast("Semua lampu dimatikan!");
         }
         else if (teks.includes("nyalakan lampu teras")) {
-            kirimPerintah("TERAS_ON");
-            tampilkanToast("Lampu Teras dinyalakan!");
+            kirimPerintah("TERAS_ON"); tampilkanToast("Lampu Teras dinyalakan!");
         } 
         else if (teks.includes("matikan lampu teras")) {
-            kirimPerintah("TERAS_OFF");
-            tampilkanToast("Lampu Teras dimatikan!");
+            kirimPerintah("TERAS_OFF"); tampilkanToast("Lampu Teras dimatikan!");
         }
         else if (teks.includes("nyalakan lampu dalam")) {
-            kirimPerintah("DALAM_ON");
-            tampilkanToast("Lampu Dalam dinyalakan!");
+            kirimPerintah("DALAM_ON"); tampilkanToast("Lampu Dalam dinyalakan!");
         } 
         else if (teks.includes("matikan lampu dalam")) {
-            kirimPerintah("DALAM_OFF");
-            tampilkanToast("Lampu Dalam dimatikan!");
+            kirimPerintah("DALAM_OFF"); tampilkanToast("Lampu Dalam dimatikan!");
         }
         else if (teks.includes("nyalakan lampu luar")) {
-            kirimPerintah("LUAR_ON");
-            tampilkanToast("Lampu Luar dinyalakan!");
+            kirimPerintah("LUAR_ON"); tampilkanToast("Lampu Luar dinyalakan!");
         } 
         else if (teks.includes("matikan lampu luar")) {
-            kirimPerintah("LUAR_OFF");
-            tampilkanToast("Lampu Luar dimatikan!");
+            kirimPerintah("LUAR_OFF"); tampilkanToast("Lampu Luar dimatikan!");
+        }
+        else if (teks.includes("nyalakan alarm")) {
+            kirimPerintah("ALARM_ON"); tampilkanToast("Alarm diaktifkan!");
+        }
+        else if (teks.includes("matikan alarm")) {
+            kirimPerintah("ALARM_OFF"); tampilkanToast("Alarm dimatikan!");
         }
         else {
             tampilkanToast("Perintah tidak dikenali.", "error");
