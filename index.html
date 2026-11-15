@@ -278,6 +278,7 @@ function connectMQTT() {
   });
 }
 
+
 // KIRIM PERINTAH
 function kirimPerintah(perintah) {
   if (!client || !client.connected) {
@@ -294,6 +295,50 @@ function kirimPerintah(perintah) {
     "LUAR_OFF":  "smartjam/masjid/lampu/luar/set"
   };
 
+  // PERINTAH NYALAKAN ATAU MATIKAN SEMUA LAMPU
+  if (
+    perintah === "SEMUA_LAMPU_ON" ||
+    perintah === "SEMUA_LAMPU_OFF"
+  ) {
+    const isiPesan =
+      perintah === "SEMUA_LAMPU_ON" ? "ON" : "OFF";
+
+    const daftarTopic = [
+      "smartjam/masjid/lampu/dalam/set",
+      "smartjam/masjid/lampu/teras/set",
+      "smartjam/masjid/lampu/luar/set"
+    ];
+
+    let selesai = 0;
+    let gagal = false;
+
+    daftarTopic.forEach(function(topic) {
+      client.publish(topic, isiPesan, { qos: 1 }, function(err) {
+        if (err) {
+          gagal = true;
+          console.error("Gagal:", topic, err);
+        }
+
+        selesai++;
+
+        if (selesai === daftarTopic.length) {
+          if (gagal) {
+            tampilkanToast("Gagal mengirim sebagian perintah!", "error");
+          } else {
+            tampilkanToast(
+              perintah === "SEMUA_LAMPU_ON"
+                ? "Perintah NYALAKAN SEMUA terkirim!"
+                : "Perintah MATIKAN SEMUA terkirim!"
+            );
+          }
+        }
+      });
+    });
+
+    return;
+  }
+
+  // PERINTAH LAMPU SATU PER SATU
   let topicTujuan = "smartjam/masjid/control";
   let isiPesan = perintah;
 
@@ -302,7 +347,7 @@ function kirimPerintah(perintah) {
     isiPesan = perintah.endsWith("_ON") ? "ON" : "OFF";
   }
 
-  client.publish(topicTujuan, isiPesan, {qos:1}, function(err) {
+  client.publish(topicTujuan, isiPesan, { qos: 1 }, function(err) {
     if (err) {
       tampilkanToast("Gagal mengirim perintah!", "error");
       console.error(err);
