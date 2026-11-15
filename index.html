@@ -91,14 +91,24 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f5f9; paddi
   <button onclick="kirimPerintah('ALARM_ON')">AKTIFKAN ALARM</button>
   <button onclick="kirimPerintah('ALARM_OFF')" style="background:#dc2626">MATIKAN ALARM</button>
   <button onclick="kirimPerintah('TEST_BUZZER')" style="background:#b45309">UJI BEL</button>
+  
+  <label>Durasi Bel (ms)</label>
+  <input type="number" id="durasiBuzzer" value="2000" min="100" max="10000" step="100">
+  <button onclick="kirimPerintah('DURASI:' + document.getElementById('durasiBuzzer').value)">SIMPAN DURASI BEL</button>
 </div>
 
-<!-- PENGUMUMAN -->
+<!-- RUNNING TEXT & KECEPATAN -->
 <div class="panel">
   <h3>📢 Running Text TV</h3>
   <textarea id="teksPengumuman" rows="3" placeholder="Ketik pengumuman untuk ditampilkan di TV..."></textarea>
   <button onclick="kirimPengumuman()">KIRIM PENGUMUMAN</button>
   <button onclick="hapusPengumuman()" style="background:#dc2626">HAPUS PENGUMUMAN</button>
+  
+  <hr>
+  <h3>⚡ Kecepatan Teks Berjalan</h3>
+  <label>Durasi Gerakan (detik)</label>
+  <input type="number" id="kecepatanRunningText" value="25" min="5" max="60">
+  <button onclick="aturKecepatanRunningText()">SIMPAN KECEPATAN</button>
 </div>
 
 <!-- KONEKSI MQTT -->
@@ -179,14 +189,12 @@ function connectMQTT() {
     if (topic !== "smartjam/masjid/data") return;
     try {
       const data = JSON.parse(message.toString());
-      
       document.getElementById("subuh").textContent = data.subuh || "--:--";
       document.getElementById("zuhur").textContent = data.zuhur || "--:--";
       document.getElementById("ashar").textContent = data.ashar || "--:--";
       document.getElementById("magrib").textContent = data.magrib || "--:--";
       document.getElementById("isya").textContent = data.isya || "--:--";
       document.getElementById("alarm").textContent = data.alarm ? "AKTIF" : "NONAKTIF";
-      
       document.getElementById("raw").textContent = JSON.stringify(data, null, 2);
     } catch (e) {}
   });
@@ -208,12 +216,11 @@ function kirimPerintah(perintah) {
   });
 }
 
-// ===== PENGUMUMAN =====
+// ===== RUNNING TEXT & KECEPATAN =====
 function kirimPengumuman() {
   const teks = document.getElementById("teksPengumuman").value.trim();
   if (!teks) { tampilkanToast("Teks kosong!", "error"); return; }
   if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
-  
   client.publish("smartjam/masjid/runningtext", teks, { qos: 1, retain: true }, function(err) {
     if (!err) tampilkanToast("Pengumuman terkirim ke TV!");
   });
@@ -226,6 +233,17 @@ function hapusPengumuman() {
       document.getElementById("teksPengumuman").value = "";
       tampilkanToast("Pengumuman dihapus.");
     }
+  });
+}
+
+function aturKecepatanRunningText() {
+  const kecepatan = Number(document.getElementById("kecepatanRunningText").value);
+  if (!Number.isInteger(kecepatan) || kecepatan < 5 || kecepatan > 60) {
+    tampilkanToast("Masukkan angka 5 sampai 60!", "error"); return;
+  }
+  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
+  client.publish("smartjam/masjid/kecepatan", String(kecepatan), { qos: 1, retain: true }, function(err) {
+    if (!err) tampilkanToast("Kecepatan diatur: " + kecepatan + " detik.");
   });
 }
 
