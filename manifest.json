@@ -1,0 +1,20 @@
+{
+  "name": "Smart Mosque Controller",
+  "short_name": "Smart Mosque",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#031d1b",
+  "theme_color": "#0B1120",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
