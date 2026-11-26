@@ -9,7 +9,6 @@
 <script src="https://cdn.jsdelivr.net/npm/suncalc@1.9.0/suncalc.js"></script>
 
 <style>
-  
 * { box-sizing: border-box; }
 body { margin: 0; padding: 18px; font-family: Arial, sans-serif; background: #031d1b; color: #172033; }
 .container { max-width: 700px; margin: auto; }
@@ -62,7 +61,7 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f5f9; paddi
 <div class="container">
 
 <header>
-  <h2>SMART JAM MASJID</h2>
+  <h2>MASJID NURUL HASANAH</h2>
   <p>Smart Mosque - Internet of Things</p>
   <div id="status" class="status">BELUM TERHUBUNG</div>
 </header>
@@ -136,6 +135,12 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f5f9; paddi
   <div class="lamp-buttons">
     <button onclick="kirimPerintah('LUAR_ON')" style="background:#16a34a">LUAR ON</button>
     <button onclick="kirimPerintah('LUAR_OFF')" style="background:#dc2626">LUAR OFF</button>
+  </div>
+  <!-- RELAY 4: LAMPU EXTRA -->
+  <div class="row"><span>Lampu Extra</span><b id="statusExtra" class="lamp-status">MENUNGGU...</b></div>
+  <div class="lamp-buttons">
+    <button onclick="kirimPerintah('EXTRA_ON')" style="background:#16a34a">EXTRA ON</button>
+    <button onclick="kirimPerintah('EXTRA_OFF')" style="background:#dc2626">EXTRA OFF</button>
   </div>
   <hr>
   <h3>💡 Kendali Semua Lampu</h3>
@@ -253,6 +258,7 @@ const TOPIC_DATA = "smartjam/masjid/data";
 const TOPIC_DALAM_STATUS = "smartjam/masjid/lampu/dalam/status";
 const TOPIC_TERAS_STATUS = "smartjam/masjid/lampu/teras/status";
 const TOPIC_LUAR_STATUS = "smartjam/masjid/lampu/luar/status";
+const TOPIC_EXTRA_STATUS = "smartjam/masjid/lampu/extra/status";
 
 function ubahStatus(teks, warna) {
   const status = document.getElementById("status");
@@ -283,12 +289,14 @@ function connectMQTT() {
     client.subscribe(TOPIC_DALAM_STATUS, {qos:1});
     client.subscribe(TOPIC_TERAS_STATUS, {qos:1});
     client.subscribe(TOPIC_LUAR_STATUS, {qos:1});
+    client.subscribe(TOPIC_EXTRA_STATUS, {qos:1});
   });
 
   client.on("message", function(topic, message) {
     if (topic === TOPIC_DALAM_STATUS) { tampilkanStatusLampu("statusDalam", message); return; }
     if (topic === TOPIC_TERAS_STATUS) { tampilkanStatusLampu("statusTeras", message); return; }
     if (topic === TOPIC_LUAR_STATUS) { tampilkanStatusLampu("statusLuar", message); return; }
+    if (topic === TOPIC_EXTRA_STATUS) { tampilkanStatusLampu("statusExtra", message); return; }
     if (topic !== TOPIC_DATA) return;
 
     try {
@@ -317,12 +325,13 @@ function kirimPerintah(perintah) {
   const topicLampu = {
     "DALAM_ON": "smartjam/masjid/lampu/dalam/set", "DALAM_OFF": "smartjam/masjid/lampu/dalam/set",
     "TERAS_ON": "smartjam/masjid/lampu/teras/set", "TERAS_OFF": "smartjam/masjid/lampu/teras/set",
-    "LUAR_ON": "smartjam/masjid/lampu/luar/set", "LUAR_OFF": "smartjam/masjid/lampu/luar/set"
+    "LUAR_ON": "smartjam/masjid/lampu/luar/set", "LUAR_OFF": "smartjam/masjid/lampu/luar/set",
+    "EXTRA_ON": "smartjam/masjid/lampu/extra/set", "EXTRA_OFF": "smartjam/masjid/lampu/extra/set"
   };
 
   if (perintah === "SEMUA_LAMPU_ON" || perintah === "SEMUA_LAMPU_OFF") {
     const isiPesan = perintah === "SEMUA_LAMPU_ON" ? "ON" : "OFF";
-    const daftarTopic = ["smartjam/masjid/lampu/dalam/set", "smartjam/masjid/lampu/teras/set", "smartjam/masjid/lampu/luar/set"];
+    const daftarTopic = ["smartjam/masjid/lampu/dalam/set", "smartjam/masjid/lampu/teras/set", "smartjam/masjid/lampu/luar/set", "smartjam/masjid/lampu/extra/set"];
     daftarTopic.forEach(topic => client.publish(topic, isiPesan, {qos:1}));
     tampilkanToast("Perintah semua lampu dikirim!");
     return;
@@ -342,7 +351,7 @@ function kirimPerintah(perintah) {
 }
 
 // =====================================
-// KIRIM JADWAL MANUAL (DIPERBAIKI)
+// KIRIM JADWAL MANUAL
 // =====================================
 function kirimJadwalManual() {
   if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
@@ -421,6 +430,8 @@ if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
     else if (teks.includes("matikan lampu dalam")) kirimPerintah("DALAM_OFF");
     else if (teks.includes("nyalakan lampu luar")) kirimPerintah("LUAR_ON");
     else if (teks.includes("matikan lampu luar")) kirimPerintah("LUAR_OFF");
+    else if (teks.includes("nyalakan lampu extra")) kirimPerintah("EXTRA_ON");
+    else if (teks.includes("matikan lampu extra")) kirimPerintah("EXTRA_OFF");
     else if (teks.includes("nyalakan alarm")) kirimPerintah("ALARM_ON");
     else if (teks.includes("matikan alarm")) kirimPerintah("ALARM_OFF");
     else tampilkanToast("Perintah tidak dikenali.", "error");
