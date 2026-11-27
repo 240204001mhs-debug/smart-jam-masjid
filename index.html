@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>SMART MOSQUE - Premium</title>
+<title>SMART MOSQUE - App</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0B1120">
@@ -23,44 +23,50 @@ body {
     radial-gradient(circle at 15% 50%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
     radial-gradient(circle at 85% 30%, rgba(56, 189, 248, 0.05) 0%, transparent 40%);
   color: #E2E8F0;
-  padding-bottom: 80px;
-  min-height: 100vh;
+  padding-bottom: 90px; /* Ruang untuk Nav Bawah */
+  overflow-x: hidden;
 }
 
 .container { max-width: 600px; margin: auto; padding: 20px; }
 
-/* HEADER PREMIUM */
+/* TABS (Halaman) */
+.tab-content {
+  display: none; /* Sembunyikan semua secara default */
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.tab-content.active {
+  display: block; /* Hanya tampilkan yang aktif */
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* HEADER */
 .header {
   text-align: center;
-  padding: 25px 20px;
+  padding: 20px;
   background: rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(15px);
-  -webkit-backdrop-filter: blur(15px);
   border: 1px solid rgba(253, 224, 71, 0.15);
   border-radius: 24px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   margin-bottom: 20px;
 }
-.header h1 {
-  font-family: 'Cinzel', serif;
-  color: #FDE047;
-  font-size: 24px;
-  letter-spacing: 3px;
-  margin-bottom: 5px;
-  text-shadow: 0 2px 10px rgba(253, 224, 71, 0.3);
-}
-.header p { font-size: 11px; color: #94A3B8; letter-spacing: 1px; }
+.header h1 { font-family: 'Cinzel', serif; color: #FDE047; font-size: 22px; letter-spacing: 2px; }
+.header p { font-size: 11px; color: #94A3B8; letter-spacing: 1px; margin-top: 5px; }
+
 .status {
   display: inline-block;
-  margin-top: 12px;
+  margin-top: 10px;
   padding: 6px 16px;
   border-radius: 20px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   background: rgba(220, 38, 38, 0.15);
   color: #FCA5A5;
   border: 1px solid rgba(220, 38, 38, 0.3);
-  transition: 0.3s;
 }
 .status.connected {
   background: rgba(22, 163, 74, 0.15);
@@ -68,102 +74,82 @@ body {
   border-color: rgba(22, 163, 74, 0.3);
 }
 
-/* PANEL KACA (GLASSMORPHISM) */
+/* PANEL KACA */
 .panel {
   background: rgba(30, 41, 59, 0.4);
   backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: 24px;
-  padding: 22px;
-  margin-top: 16px;
+  padding: 20px;
+  margin-bottom: 16px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  transition: transform 0.3s ease;
 }
-.panel h3 {
-  color: #FDE047;
-  font-size: 15px;
-  letter-spacing: 1px;
-  margin-bottom: 15px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding-bottom: 10px;
-}
+.panel h3 { color: #FDE047; font-size: 14px; letter-spacing: 1px; margin-bottom: 15px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); padding-bottom: 10px; }
 
 /* JAM */
 .clock { text-align: center; }
-#clock { font-size: 52px; font-weight: 800; color: #FDE047; text-shadow: 0 0 20px rgba(253, 224, 71, 0.3); }
-#date { font-size: 14px; color: #94A3B8; margin-top: 5px; }
-.hijri-date { display: inline-block; margin-top: 12px; padding: 8px 16px; background: rgba(253, 224, 71, 0.1); border-radius: 12px; color: #FDE047; font-size: 13px; font-weight: 600; }
+#clock { font-size: 48px; font-weight: 800; color: #FDE047; text-shadow: 0 0 20px rgba(253, 224, 71, 0.3); }
+#date { font-size: 13px; color: #94A3B8; margin-top: 5px; }
+.hijri-date { display: inline-block; margin-top: 10px; padding: 8px 16px; background: rgba(253, 224, 71, 0.1); border-radius: 12px; color: #FDE047; font-size: 12px; font-weight: 600; }
 
-/* FORM & INPUT */
+/* INPUT & BUTTON */
 input, button, textarea {
-  width: 100%;
-  padding: 14px;
-  margin: 6px 0;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: white;
-  font-family: 'Montserrat', sans-serif;
-  font-size: 14px;
+  width: 100%; padding: 14px; margin: 6px 0;
+  background: rgba(0, 0, 0, 0.2); border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px; color: white; font-family: 'Montserrat', sans-serif; font-size: 14px;
   outline: none;
-  transition: 0.3s;
 }
-input:focus, textarea:focus { border-color: #FDE047; background: rgba(0, 0, 0, 0.4); }
-
-button {
-  background: linear-gradient(135deg, #FDE047, #D4AF37);
-  color: #0B1120;
-  font-weight: 800;
-  border: none;
-  cursor: pointer;
-  letter-spacing: 1px;
-  margin-top: 10px;
-}
+input:focus, textarea:focus { border-color: #FDE047; background: rgba(0,0,0,0.4); }
+button { background: linear-gradient(135deg, #FDE047, #D4AF37); color: #0B1120; font-weight: 800; border: none; cursor: pointer; letter-spacing: 1px; margin-top: 8px; }
 button:active { transform: scale(0.97); }
-button.btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+button.btn-sec { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
 
 /* BARIS JADWAL */
 .row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 14px; }
 .row:last-child { border-bottom: none; }
 .row b { color: #FDE047; font-size: 16px; }
-.row .lamp-status { font-size: 12px; padding: 4px 10px; border-radius: 10px; background: rgba(255,255,255,0.05); color: #94A3B8; }
+.lamp-status { font-size: 11px; padding: 4px 10px; border-radius: 10px; background: rgba(255,255,255,0.05); color: #94A3B8; }
 
-/* TOMBOL LAMPU (PILL SHAPE) */
-.lamp-buttons { display: flex; gap: 10px; margin-bottom: 15px; }
-.lamp-buttons button {
-  flex: 1;
-  border-radius: 50px; /* Membuat tombol jadi kapsul */
-  padding: 12px;
-  font-size: 13px;
-  margin: 0;
-}
+/* TOMBOL LAMPU */
+.lamp-buttons { display: flex; gap: 10px; margin-bottom: 12px; }
+.lamp-buttons button { flex: 1; border-radius: 50px; padding: 12px; font-size: 13px; margin: 0; }
 .btn-on { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; }
 .btn-off { background: linear-gradient(135deg, #EF4444, #B91C1C); color: white; border: none; }
 
-/* TOMBOL MIKROFON BULAT */
+/* MIKROFON */
 .mic-container { text-align: center; }
 #btnMic {
-  width: 80px; height: 80px; border-radius: 50%;
-  font-size: 32px; display: grid; place-items: center;
+  width: 80px; height: 80px; border-radius: 50%; font-size: 32px;
+  display: grid; place-items: center; margin: 0 auto;
   background: linear-gradient(135deg, #38BDF8, #0284C7);
-  color: white; border: none; margin: 0 auto;
-  box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
-  transition: 0.3s;
+  color: white; border: none; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4);
 }
-#btnMic:active { transform: scale(0.9); }
+
+/* BOTTOM NAVIGATION BAR */
+.bottom-nav {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  width: 90%; max-width: 400px; height: 70px;
+  background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 35px;
+  display: flex; justify-content: space-around; align-items: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); z-index: 9999;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: #64748B; font-size: 10px; font-weight: 600; letter-spacing: 1px;
+  cursor: pointer; width: 60px; height: 100%; transition: 0.3s;
+}
+.nav-item .icon { font-size: 22px; margin-bottom: 4px; transition: 0.3s; }
+.nav-item.active { color: #FDE047; }
+.nav-item.active .icon { transform: translateY(-3px); text-shadow: 0 0 15px rgba(253, 224, 71, 0.5); }
 
 /* TOAST */
 #toast {
-  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(100px);
   background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(10px);
   color: #FDE047; padding: 14px 24px; border-radius: 30px;
   font-weight: 600; font-size: 13px; border: 1px solid rgba(253,224,71,0.3);
-  transition: transform .4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 99999;
-  width: max-content; max-width: 90%; text-align: center;
+  transition: transform .4s; z-index: 99999; width: max-content; max-width: 90%; text-align: center;
 }
 #toast.show { transform: translateX(-50%) translateY(0); }
 #toast.error { color: #FCA5A5; border-color: rgba(220,38,38,0.3); }
@@ -173,110 +159,153 @@ button.btn-secondary { background: rgba(255,255,255,0.1); color: white; border: 
 <body>
 <div class="container">
 
+<!-- HEADER SELALU TAMPIL -->
 <header class="header">
   <h1>MASJID NURUL HASANAH</h1>
-  <p>SMART MOSQUE • PREMIUM IoT</p>
+  <p>SMART MOSQUE APP</p>
   <div id="status" class="status">Menghubungkan...</div>
 </header>
 
-<div class="panel clock">
-  <small style="color:#94A3B8; letter-spacing:2px;">WAKTU SAAT INI - WITA</small>
-  <div id="clock">--:--:--</div>
-  <div id="date">Memuat tanggal...</div>
-  <div class="hijri-date">🌙 <span id="tanggalHijriah">Memuat...</span></div>
-</div>
-
-<div class="panel mic-container">
-  <h3 style="justify-content:center;">🎙️ Asisten Suara</h3>
-  <button type="button" id="btnMic" onclick="mulaiDengar()">🎤</button>
-  <p id="statusSuara" style="margin-top:15px; font-size:13px; color:#94A3B8;">Tekan mikrofon lalu bicara...</p>
-</div>
-
-<div class="panel">
-  <h3>🕌 Jadwal Salat</h3>
-  <div class="row"><span>Subuh</span><b id="subuh">--:--</b></div>
-  <div class="row"><span>Zuhur</span><b id="zuhur">--:--</b></div>
-  <div class="row"><span>Asar</span><b id="ashar">--:--</b></div>
-  <div class="row"><span>Magrib</span><b id="magrib">--:--</b></div>
-  <div class="row"><span>Isya</span><b id="isya">--:--</b></div>
-  <div class="row" style="border:none;"><span>Alarm</span><span id="alarm" style="color:#94A3B8; font-weight:bold;">Menunggu...</span></div>
-</div>
-
-<div class="panel">
-  <h3>💡 Kendali Lampu</h3>
-  
-  <div class="row"><span>Lampu Teras</span><span id="statusTeras" class="lamp-status">-</span></div>
-  <div class="lamp-buttons">
-    <button onclick="kirimPerintah('TERAS_ON')" class="btn-on">ON</button>
-    <button onclick="kirimPerintah('TERAS_OFF')" class="btn-off">OFF</button>
+<!-- TAB 1: HOME -->
+<div id="tab-home" class="tab-content active">
+  <div class="panel clock">
+    <small style="color:#94A3B8; letter-spacing:2px;">WAKTU SAAT INI - WITA</small>
+    <div id="clock">--:--:--</div>
+    <div id="date">Memuat tanggal...</div>
+    <div class="hijri-date">🌙 <span id="tanggalHijriah">Memuat...</span></div>
   </div>
 
-  <div class="row"><span>Lampu Dalam</span><span id="statusDalam" class="lamp-status">-</span></div>
-  <div class="lamp-buttons">
-    <button onclick="kirimPerintah('DALAM_ON')" class="btn-on">ON</button>
-    <button onclick="kirimPerintah('DALAM_OFF')" class="btn-off">OFF</button>
+  <div class="panel mic-container">
+    <h3 style="justify-content:center;">🎙️ Asisten Suara</h3>
+    <button type="button" id="btnMic" onclick="mulaiDengar()">🎤</button>
+    <p id="statusSuara" style="margin-top:15px; font-size:12px; color:#94A3B8;">Tekan mikrofon lalu bicara...</p>
   </div>
 
-  <div class="row"><span>Lampu Luar</span><span id="statusLuar" class="lamp-status">-</span></div>
-  <div class="lamp-buttons">
-    <button onclick="kirimPerintah('LUAR_ON')" class="btn-on">ON</button>
-    <button onclick="kirimPerintah('LUAR_OFF')" class="btn-off">OFF</button>
-  </div>
-
-  <div class="row"><span>Lampu Extra</span><span id="statusExtra" class="lamp-status">-</span></div>
-  <div class="lamp-buttons">
-    <button onclick="kirimPerintah('EXTRA_ON')" class="btn-on">ON</button>
-    <button onclick="kirimPerintah('EXTRA_OFF')" class="btn-off">OFF</button>
-  </div>
-
-  <div style="display:flex; gap:10px; margin-top:15px;">
-    <button onclick="kirimBerurutan('ON')" class="btn-secondary" style="border-color:#10B981; color:#10B981;">NYALAKAN SEMUA</button>
-    <button onclick="kirimBerurutan('OFF')" class="btn-secondary" style="border-color:#EF4444; color:#EF4444;">MATIKAN SEMUA</button>
+  <div class="panel">
+    <h3>🕌 Jadwal Salat</h3>
+    <div class="row"><span>Subuh</span><b id="subuh">--:--</b></div>
+    <div class="row"><span>Zuhur</span><b id="zuhur">--:--</b></div>
+    <div class="row"><span>Asar</span><b id="ashar">--:--</b></div>
+    <div class="row"><span>Magrib</span><b id="magrib">--:--</b></div>
+    <div class="row"><span>Isya</span><b id="isya">--:--</b></div>
   </div>
 </div>
 
-<div class="panel">
-  <h3>⚙️ Pengaturan Jadwal</h3>
-  <button onclick="kirimPerintah('MODE_AUTO')" class="btn-secondary">AKTIFKAN MODE OTOMATIS</button>
-  <div style="display:flex; gap:10px; margin-top:10px;">
-    <input type="time" id="manualSubuh" value="04:30">
-    <input type="time" id="manualZuhur" value="12:05">
-    <input type="time" id="manualAshar" value="15:20">
-    <input type="time" id="manualMagrib" value="18:15">
-    <input type="time" id="manualIsya" value="19:30">
+<!-- TAB 2: KONTROL -->
+<div id="tab-kontrol" class="tab-content">
+  <div class="panel">
+    <h3>💡 Kendali Lampu</h3>
+    
+    <div class="row"><span>Lampu Teras</span><span id="statusTeras" class="lamp-status">-</span></div>
+    <div class="lamp-buttons">
+      <button onclick="kirimPerintah('TERAS_ON')" class="btn-on">ON</button>
+      <button onclick="kirimPerintah('TERAS_OFF')" class="btn-off">OFF</button>
+    </div>
+
+    <div class="row"><span>Lampu Dalam</span><span id="statusDalam" class="lamp-status">-</span></div>
+    <div class="lamp-buttons">
+      <button onclick="kirimPerintah('DALAM_ON')" class="btn-on">ON</button>
+      <button onclick="kirimPerintah('DALAM_OFF')" class="btn-off">OFF</button>
+    </div>
+
+    <div class="row"><span>Lampu Luar</span><span id="statusLuar" class="lamp-status">-</span></div>
+    <div class="lamp-buttons">
+      <button onclick="kirimPerintah('LUAR_ON')" class="btn-on">ON</button>
+      <button onclick="kirimPerintah('LUAR_OFF')" class="btn-off">OFF</button>
+    </div>
+
+    <div class="row"><span>Lampu Extra</span><span id="statusExtra" class="lamp-status">-</span></div>
+    <div class="lamp-buttons">
+      <button onclick="kirimPerintah('EXTRA_ON')" class="btn-on">ON</button>
+      <button onclick="kirimPerintah('EXTRA_OFF')" class="btn-off">OFF</button>
+    </div>
+
+    <div style="display:flex; gap:10px; margin-top:15px;">
+      <button onclick="kirimBerurutan('ON')" class="btn-sec" style="border-color:#10B981; color:#10B981;">NYALAKAN SEMUA</button>
+      <button onclick="kirimBerurutan('OFF')" class="btn-sec" style="border-color:#EF4444; color:#EF4444;">MATIKAN SEMUA</button>
+    </div>
   </div>
-  <button onclick="kirimJadwalManual()">SIMPAN JADWAL MANUAL</button>
+
+  <div class="panel">
+    <h3>🔔 Alarm & Bel</h3>
+    <div class="lamp-buttons">
+      <button onclick="kirimPerintah('ALARM_ON')" class="btn-on">AKTIFKAN</button>
+      <button onclick="kirimPerintah('ALARM_OFF')" class="btn-off">MATIKAN</button>
+    </div>
+    <button onclick="kirimPerintah('TEST_BUZZER')" class="btn-sec">UJI BEL</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <input type="number" id="durasiBuzzer" value="2000" min="100" max="10000" placeholder="Durasi (ms)">
+      <button onclick="kirimPerintah('DURASI:' + document.getElementById('durasiBuzzer').value)" style="flex:1;">SIMPAN</button>
+    </div>
+  </div>
 </div>
 
-<div class="panel">
-  <h3>📢 Running Text TV</h3>
-  <textarea id="teksPengumuman" rows="3" placeholder="Ketik pengumuman..."></textarea>
-  <button onclick="kirimPengumuman()">KIRIM PENGUMUMAN</button>
-  <button onclick="hapusPengumuman()" class="btn-secondary" style="color:#EF4444;">HAPUS PENGUMUMAN</button>
-  <div style="display:flex; gap:10px; margin-top:10px;">
-    <input type="number" id="kecepatanRunningText" value="25" min="5" max="60" placeholder="Kecepatan (detik)">
-    <button onclick="aturKecepatanRunningText()" style="flex:1;">SIMPAN</button>
+<!-- TAB 3: SETELAN -->
+<div id="tab-setelan" class="tab-content">
+  <div class="panel">
+    <h3>⚙️ Mode Jadwal</h3>
+    <button onclick="kirimPerintah('MODE_AUTO')" class="btn-sec" style="margin-bottom:10px;">AKTIFKAN MODE OTOMATIS</button>
+    <div style="display:flex; gap:10px;">
+      <input type="time" id="manualSubuh" value="04:30">
+      <input type="time" id="manualZuhur" value="12:05">
+      <input type="time" id="manualAshar" value="15:20">
+      <input type="time" id="manualMagrib" value="18:15">
+      <input type="time" id="manualIsya" value="19:30">
+    </div>
+    <button onclick="kirimJadwalManual()">SIMPAN JADWAL MANUAL</button>
+  </div>
+
+  <div class="panel">
+    <h3>📢 Running Text</h3>
+    <textarea id="teksPengumuman" rows="2" placeholder="Ketik pengumuman..."></textarea>
+    <button onclick="kirimPengumuman()">KIRIM PENGUMUMAN</button>
+    <button onclick="hapusPengumuman()" class="btn-sec" style="color:#EF4444;">HAPUS PENGUMUMAN</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+      <input type="number" id="kecepatanRunningText" value="25" min="5" max="60" placeholder="Kecepatan (detik)">
+      <button onclick="aturKecepatanRunningText()" style="flex:1;">SIMPAN</button>
+    </div>
   </div>
 </div>
 
-<div class="panel">
-  <h3>🔔 Alarm & Bel</h3>
-  <div class="lamp-buttons">
-    <button onclick="kirimPerintah('ALARM_ON')" class="btn-on">AKTIFKAN</button>
-    <button onclick="kirimPerintah('ALARM_OFF')" class="btn-off">MATIKAN</button>
-  </div>
-  <button onclick="kirimPerintah('TEST_BUZZER')" class="btn-secondary">UJI BEL</button>
-  <div style="display:flex; gap:10px; margin-top:10px;">
-    <input type="number" id="durasiBuzzer" value="2000" min="100" max="10000" placeholder="Durasi (ms)">
-    <button onclick="kirimPerintah('DURASI:' + document.getElementById('durasiBuzzer').value)" style="flex:1;">SIMPAN</button>
-  </div>
-</div>
+</div> <!-- END CONTAINER -->
 
+<!-- NAVIGASI BAWAH -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="bukaTab('home', this)">
+    <div class="icon">🏠</div>
+    <span>HOME</span>
+  </div>
+  <div class="nav-item" onclick="bukaTab('kontrol', this)">
+    <div class="icon">💡</div>
+    <span>KONTROL</span>
+  </div>
+  <div class="nav-item" onclick="bukaTab('setelan', this)">
+    <div class="icon">⚙️</div>
+    <span>SETELAN</span>
+  </div>
 </div>
 
 <div id="toast"></div>
 
 <script>
+// =====================================
+// LOGIKA NAVIGASI TAB
+// =====================================
+function bukaTab(namaTab, elemenNav) {
+  // 1. Sembunyikan semua konten tab
+  const semuaTab = document.querySelectorAll(".tab-content");
+  semuaTab.forEach(tab => tab.classList.remove("active"));
+
+  // 2. Hapus status aktif dari semua tombol nav
+  const semuaNav = document.querySelectorAll(".nav-item");
+  semuaNav.forEach(nav => nav.classList.remove("active"));
+
+  // 3. Tampilkan tab yang dipilih dan tandai nav-nya
+  document.getElementById("tab-" + namaTab).classList.add("active");
+  elemenNav.classList.add("active");
+}
+
+
 // =====================================
 // KONFIGURASI MQTT OTOMATIS
 // =====================================
@@ -292,21 +321,13 @@ const TOPIC_EXTRA_STATUS = "smartjam/masjid/lampu/extra/status";
 
 let client = null;
 
-// =====================================
-// TOAST
-// =====================================
-let toastTimer = null;
 function tampilkanToast(pesan, tipe) {
   const toast = document.getElementById("toast");
   toast.textContent = pesan;
   toast.className = tipe === "error" ? "show error" : "show";
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(function() { toast.className = ""; }, 3000);
+  setTimeout(() => { toast.className = ""; }, 3000);
 }
 
-// =====================================
-// JAM WITA & HIJRIAH
-// =====================================
 function jalankanJam() {
   const sekarang = new Date();
   document.getElementById("clock").textContent = sekarang.toLocaleTimeString("id-ID", { timeZone: "Asia/Makassar", hour12: false });
@@ -322,49 +343,26 @@ function tampilkanTanggalHijriah() {
 }
 tampilkanTanggalHijriah(); setInterval(tampilkanTanggalHijriah, 3600000);
 
-// =====================================
-// LUNARVIEW (Di Sembunyikan untuk tampilan premium, tapi tetap jalan di background jika perlu)
-// =====================================
-
-// =====================================
-// MQTT AUTO-CONNECT & SUBSCRIBE
-// =====================================
 function ubahStatus(teks, warna) {
   const status = document.getElementById("status");
   status.textContent = teks;
   status.style.color = warna;
-  if (teks.includes("TERHUBUNG")) {
-    status.classList.add("connected");
-  } else {
-    status.classList.remove("connected");
-  }
+  if (teks.includes("TERHUBUNG")) status.classList.add("connected");
+  else status.classList.remove("connected");
 }
 
 function tampilkanStatusLampu(id, pesan) {
   const elemen = document.getElementById(id);
   const status = pesan.toString().trim().toUpperCase();
-  if (status === "ON") { 
-    elemen.textContent = "MENYALA"; 
-    elemen.style.color = "#10B981"; 
-    elemen.style.background = "rgba(16, 185, 129, 0.15)";
-  }
-  else if (status === "OFF") { 
-    elemen.textContent = "MATI"; 
-    elemen.style.color = "#EF4444"; 
-    elemen.style.background = "rgba(239, 68, 68, 0.15)";
-  }
+  if (status === "ON") { elemen.textContent = "MENYALA"; elemen.style.color = "#10B981"; elemen.style.background = "rgba(16, 185, 129, 0.15)"; }
+  else if (status === "OFF") { elemen.textContent = "MATI"; elemen.style.color = "#EF4444"; elemen.style.background = "rgba(239, 68, 68, 0.15)"; }
 }
 
 function connectMQTT() {
   if (client) { try { client.end(true); } catch(e){} }
   ubahStatus("Menghubungkan...", "#b45309");
   
-  client = mqtt.connect(MQTT_URL, { 
-      username: MQTT_USER, 
-      password: MQTT_PASS, 
-      clientId: "dashboard_" + Math.random().toString(16).slice(2), 
-      clean: true 
-  });
+  client = mqtt.connect(MQTT_URL, { username: MQTT_USER, password: MQTT_PASS, clientId: "dashboard_" + Math.random().toString(16).slice(2), clean: true });
 
   client.on("connect", function() {
     ubahStatus("✅ TERHUBUNG", "#16a34a");
@@ -389,131 +387,85 @@ function connectMQTT() {
       document.getElementById("ashar").textContent = data.ashar || "--:--";
       document.getElementById("magrib").textContent = data.magrib || "--:--";
       document.getElementById("isya").textContent = data.isya || "--:--";
-      document.getElementById("alarm").textContent = data.alarm ? "AKTIF" : "NONAKTIF";
     } catch(error) {}
   });
 
-  client.on("error", function(error) { ubahStatus("KESALAHAN KONEKSI", "#dc2626"); });
+  client.on("error", function() { ubahStatus("KESALAHAN", "#dc2626"); });
   client.on("close", function() { ubahStatus("TERPUTUS", "#dc2626"); });
-  client.on("reconnect", function() { ubahStatus("MENGHUBUNGKAN ULANG...", "#b45309"); });
 }
 
 connectMQTT();
 
-// =====================================
-// FUNGSI KIRIM BERURUTAN (EFEK VISUAL)
-// =====================================
 function kirimBerurutan(aksi) {
   if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
-
-  const daftarLampu = [
-    "smartjam/masjid/lampu/teras/set",
-    "smartjam/masjid/lampu/dalam/set",
-    "smartjam/masjid/lampu/luar/set",
-    "smartjam/masjid/lampu/extra/set"
-  ];
-
-  tampilkanToast("Menjalankan aksi berurutan...");
-
+  const daftarLampu = ["smartjam/masjid/lampu/teras/set", "smartjam/masjid/lampu/dalam/set", "smartjam/masjid/lampu/luar/set", "smartjam/masjid/lampu/extra/set"];
+  tampilkanToast("Aksi berurutan...");
   daftarLampu.forEach((topic, index) => {
-    setTimeout(() => {
-      client.publish(topic, aksi, {qos:1});
-    }, index * 300);
+    setTimeout(() => { client.publish(topic, aksi, {qos:1}); }, index * 300);
   });
 }
 
-// =====================================
-// KIRIM PERINTAH (LAMPU & ALARM)
-// =====================================
 function kirimPerintah(perintah) {
   if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
-
   const topicLampu = {
     "DALAM_ON": "smartjam/masjid/lampu/dalam/set", "DALAM_OFF": "smartjam/masjid/lampu/dalam/set",
     "TERAS_ON": "smartjam/masjid/lampu/teras/set", "TERAS_OFF": "smartjam/masjid/lampu/teras/set",
     "LUAR_ON": "smartjam/masjid/lampu/luar/set", "LUAR_OFF": "smartjam/masjid/lampu/luar/set",
     "EXTRA_ON": "smartjam/masjid/lampu/extra/set", "EXTRA_OFF": "smartjam/masjid/lampu/extra/set"
   };
-
   let topicTujuan = "smartjam/masjid/control";
   let isiPesan = perintah;
   if (topicLampu[perintah]) {
     topicTujuan = topicLampu[perintah];
     isiPesan = perintah.endsWith("_ON") ? "ON" : "OFF";
   }
-
   client.publish(topicTujuan, isiPesan, {qos:1}, function(err) {
-    if (err) tampilkanToast("Gagal mengirim perintah!", "error");
-    else tampilkanToast("Perintah: " + perintah);
+    if (!err) tampilkanToast("Perintah: " + perintah);
   });
 }
 
-// =====================================
-// KIRIM JADWAL MANUAL & RUNNING TEXT
-// =====================================
 function kirimJadwalManual() {
-  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
-  const subuh = document.getElementById("manualSubuh").value;
-  const zuhur = document.getElementById("manualZuhur").value;
-  const ashar = document.getElementById("manualAshar").value;
-  const magrib = document.getElementById("manualMagrib").value;
-  const isya = document.getElementById("manualIsya").value;
-  if (!subuh || !zuhur || !ashar || !magrib || !isya) { tampilkanToast("Isi semua jadwal!", "error"); return; }
-  const perintah = "JADWAL:" + [subuh, zuhur, ashar, magrib, isya].join(",");
-  client.publish("smartjam/masjid/control", perintah, { qos: 1 }, function(err) {
-    if (err) tampilkanToast("Gagal!", "error");
-    else tampilkanToast("Jadwal manual terkirim.");
+  if (!client || !client.connected) return;
+  const s = document.getElementById("manualSubuh").value, z = document.getElementById("manualZuhur").value, a = document.getElementById("manualAshar").value, m = document.getElementById("manualMagrib").value, i = document.getElementById("manualIsya").value;
+  if (!s || !z || !a || !m || !i) return;
+  client.publish("smartjam/masjid/control", "JADWAL:" + [s, z, a, m, i].join(","), { qos: 1 }, function(err) {
+    if (!err) tampilkanToast("Jadwal dikirim.");
   });
 }
 
 function kirimPengumuman() {
   const teks = document.getElementById("teksPengumuman").value.trim();
-  if (!teks) { tampilkanToast("Teks kosong!", "error"); return; }
-  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
+  if (!teks || !client) return;
   client.publish("smartjam/masjid/runningtext", teks, {qos:1, retain:true}, function(err) {
-    if (!err) tampilkanToast("Pengumuman terkirim ke TV!");
+    if (!err) tampilkanToast("Pengumuman terkirim!");
   });
 }
 
 function hapusPengumuman() {
-  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
+  if (!client) return;
   client.publish("smartjam/masjid/runningtext", " ", {qos:1, retain:true}, function(err) {
-    if (!err) { document.getElementById("teksPengumuman").value = ""; tampilkanToast("Pengumuman dihapus."); }
+    if (!err) { document.getElementById("teksPengumuman").value = ""; tampilkanToast("Dihapus."); }
   });
 }
 
 function aturKecepatanRunningText() {
-  const kecepatan = Number(document.getElementById("kecepatanRunningText").value);
-  if (!Number.isInteger(kecepatan) || kecepatan < 5 || kecepatan > 60) { tampilkanToast("Masukkan angka 5-60!", "error"); return; }
-  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
-  client.publish("smartjam/masjid/kecepatan", String(kecepatan), {qos:1, retain:true}, function(err) {
-    if (!err) tampilkanToast("Kecepatan: " + kecepatan + " detik.");
+  const k = Number(document.getElementById("kecepatanRunningText").value);
+  if (!client) return;
+  client.publish("smartjam/masjid/kecepatan", String(k), {qos:1, retain:true}, function(err) {
+    if (!err) tampilkanToast("Kecepatan: " + k + "s");
   });
 }
 
-// =====================================
 // ASISTEN SUARA
-// =====================================
-let recognition = null;
-let sedangMendengar = false;
-
+let recognition = null, sedangMendengar = false;
 if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SpeechRecognition();
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
   recognition.lang = "id-ID";
-  recognition.continuous = false;
-  recognition.interimResults = false;
-
-  recognition.onstart = function() {
-    sedangMendengar = true;
-    document.getElementById("btnMic").style.background = "linear-gradient(135deg, #EF4444, #B91C1C)";
-    document.getElementById("statusSuara").textContent = "Mendengarkan...";
-  };
-
-  recognition.onresult = function(event) {
+  recognition.onstart = () => { sedangMendengar = true; document.getElementById("btnMic").style.background = "linear-gradient(135deg, #EF4444, #B91C1C)"; document.getElementById("statusSuara").textContent = "Mendengarkan..."; };
+  recognition.onresult = (event) => {
     const teks = event.results[0][0].transcript.toLowerCase();
     document.getElementById("statusSuara").textContent = "Anda: " + teks;
-
     if (teks.includes("nyalakan semua lampu")) kirimBerurutan("ON");
     else if (teks.includes("matikan semua lampu")) kirimBerurutan("OFF");
     else if (teks.includes("nyalakan lampu teras")) kirimPerintah("TERAS_ON");
@@ -524,27 +476,15 @@ if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
     else if (teks.includes("matikan lampu luar")) kirimPerintah("LUAR_OFF");
     else if (teks.includes("nyalakan lampu extra")) kirimPerintah("EXTRA_ON");
     else if (teks.includes("matikan lampu extra")) kirimPerintah("EXTRA_OFF");
-    else if (teks.includes("nyalakan alarm")) kirimPerintah("ALARM_ON");
-    else if (teks.includes("matikan alarm")) kirimPerintah("ALARM_OFF");
     else tampilkanToast("Perintah tidak dikenali.", "error");
   };
-
-  recognition.onerror = function() {
-    document.getElementById("statusSuara").textContent = "Gagal mendengar. Coba lagi.";
-    resetTombolMic();
-  };
-
-  recognition.onend = function() { resetTombolMic(); };
+  recognition.onerror = () => { document.getElementById("statusSuara").textContent = "Gagal mendengar."; resetTombolMic(); };
+  recognition.onend = () => { resetTombolMic(); };
 }
-
-function resetTombolMic() {
-  sedangMendengar = false;
-  document.getElementById("btnMic").style.background = "linear-gradient(135deg, #38BDF8, #0284C7)";
-}
-
+function resetTombolMic() { sedangMendengar = false; document.getElementById("btnMic").style.background = "linear-gradient(135deg, #38BDF8, #0284C7)"; }
 function mulaiDengar() {
-  if (!client || !client.connected) { tampilkanToast("Hubungkan MQTT terlebih dahulu!", "error"); return; }
-  if (!recognition) { tampilkanToast("Browser tidak mendukung suara.", "error"); return; }
+  if (!client || !client.connected) return;
+  if (!recognition) return;
   if (sedangMendengar) recognition.stop();
   else recognition.start();
 }
