@@ -145,8 +145,8 @@ pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #f1f5f9; paddi
   <hr>
   <h3>💡 Kendali Semua Lampu</h3>
   <div class="lamp-buttons">
-    <button onclick="kirimPerintah('SEMUA_LAMPU_ON')" style="background:#15803d">NYALAKAN SEMUA</button>
-    <button onclick="kirimPerintah('SEMUA_LAMPU_OFF')" style="background:#b91c1c">MATIKAN SEMUA</button>
+    <button onclick="kirimBerurutan('ON')" style="background:#15803d">NYALAKAN SEMUA</button>
+    <button onclick="kirimBerurutan('OFF')" style="background:#b91c1c">MATIKAN SEMUA</button>
   </div>
 </div>
 
@@ -317,6 +317,30 @@ function connectMQTT() {
 }
 
 // =====================================
+// FUNGSI KIRIM BERURUTAN (EFEK VISUAL)
+// =====================================
+function kirimBerurutan(aksi) {
+  if (!client || !client.connected) { tampilkanToast("MQTT belum terhubung!", "error"); return; }
+
+  // Daftar topik lampu yang akan dinyalakan/dimatikan berurutan
+  const daftarLampu = [
+    "smartjam/masjid/lampu/teras/set",
+    "smartjam/masjid/lampu/dalam/set",
+    "smartjam/masjid/lampu/luar/set",
+    "smartjam/masjid/lampu/extra/set"
+  ];
+
+  tampilkanToast("Menjalankan aksi berurutan...");
+
+  daftarLampu.forEach((topic, index) => {
+    setTimeout(() => {
+      client.publish(topic, aksi, {qos:1});
+      console.log("Mengirim ke", topic, ":", aksi);
+    }, index * 300); // Jeda 300ms (0.3 detik) antar lampu
+  });
+}
+
+// =====================================
 // KIRIM PERINTAH (LAMPU & ALARM)
 // =====================================
 function kirimPerintah(perintah) {
@@ -328,14 +352,6 @@ function kirimPerintah(perintah) {
     "LUAR_ON": "smartjam/masjid/lampu/luar/set", "LUAR_OFF": "smartjam/masjid/lampu/luar/set",
     "EXTRA_ON": "smartjam/masjid/lampu/extra/set", "EXTRA_OFF": "smartjam/masjid/lampu/extra/set"
   };
-
-  if (perintah === "SEMUA_LAMPU_ON" || perintah === "SEMUA_LAMPU_OFF") {
-    const isiPesan = perintah === "SEMUA_LAMPU_ON" ? "ON" : "OFF";
-    const daftarTopic = ["smartjam/masjid/lampu/dalam/set", "smartjam/masjid/lampu/teras/set", "smartjam/masjid/lampu/luar/set", "smartjam/masjid/lampu/extra/set"];
-    daftarTopic.forEach(topic => client.publish(topic, isiPesan, {qos:1}));
-    tampilkanToast("Perintah semua lampu dikirim!");
-    return;
-  }
 
   let topicTujuan = "smartjam/masjid/control";
   let isiPesan = perintah;
@@ -422,8 +438,8 @@ if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
     const teks = event.results[0][0].transcript.toLowerCase();
     document.getElementById("statusSuara").textContent = "Anda: " + teks;
 
-    if (teks.includes("nyalakan semua lampu")) kirimPerintah("SEMUA_LAMPU_ON");
-    else if (teks.includes("matikan semua lampu")) kirimPerintah("SEMUA_LAMPU_OFF");
+    if (teks.includes("nyalakan semua lampu")) kirimBerurutan("ON");
+    else if (teks.includes("matikan semua lampu")) kirimBerurutan("OFF");
     else if (teks.includes("nyalakan lampu teras")) kirimPerintah("TERAS_ON");
     else if (teks.includes("matikan lampu teras")) kirimPerintah("TERAS_OFF");
     else if (teks.includes("nyalakan lampu dalam")) kirimPerintah("DALAM_ON");
